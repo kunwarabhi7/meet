@@ -1,0 +1,77 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Build output directories
+dist/
+build/
+public/build/
+.next/  # For Next.js (if you decide to use it instead of React)
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directories (used by testing tools like Istanbul or Jest)
+coverage/
+.nyc_output/
+
+# Optional npm cache directory
+.npm/
+
+# Optional REPL history
+.node_repl_history
+
+# macOS-specific files
+.DS_Store
+
+# Editor-specific files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Compiled binary addons (Node.js addons)
+build/Release/
+
+# Grunt intermediate storage
+.grunt/
+
+# Node-waf configuration
+.lock-wscript/
+
+# React-specific build output
+client/build/  # If your React app is in a 'client' folder
+public/dist/   # If you have a custom public dist folder
+
+# Testing-related files
+cypress/videos/
+cypress/screenshots/
+
+# MongoDB local data (if running MongoDB locally)
+data/
+*.mongorc.js
+
+# Miscellaneous
+*.orig
+*.bak
+*.tmp
