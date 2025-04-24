@@ -19,8 +19,16 @@ app.use("/api/user", userRoute);
 app.get("/", (req, res) => {
   res.send("API is working fine!");
 });
-
-app.listen(PORT, () => {
-  console.log("Server is running on port " + PORT);
-  connectDB();
-});
+//start server only after successful connection to the database
+const startServer = async () => {
+  try {
+    await connectDB();
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("Error starting server:", error);
+    process.exit(1); // Exit the process with failure
+  }
+};
+startServer();

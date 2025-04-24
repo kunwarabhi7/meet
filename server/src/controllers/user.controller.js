@@ -1,8 +1,9 @@
 import User from "../models/user.model.js";
 import validator from "validator";
 import jwt from "jsonwebtoken";
+import { sendEmail } from "../utils/sendEmail.js";
 
-const validateInput = (username, email, password, fullName) => {
+const validateSignupInputs = ({ username, email, password, fullName }) => {
   const errors = [];
   if (!username || username.length < 3) {
     errors.push("Username must be at least 3 characters long.");
@@ -13,9 +14,16 @@ const validateInput = (username, email, password, fullName) => {
   if (!password || password.length < 6) {
     errors.push("Password must be at least 6 characters long.");
   }
-  if (!fullName || fullName.trim === "" || fullName.length < 3) {
+  if (!fullName || fullName.trim() === "" || fullName.length < 3) {
     errors.push("Full name must be at least 3 characters long.");
   }
+  return errors;
+};
+const validateLoginInput = ({ usermail, password }) => {
+  const errors = [];
+  if (!usermail || usermail.trim() === "")
+    errors.push("Username or email is required");
+  if (!password || password.trim() === "") errors.push("Password is required");
   return errors;
 };
 
@@ -23,12 +31,21 @@ const SignUp = async (req, res) => {
   const { username, email, password, fullName, bio, profilePicture } = req.body;
   try {
     // Validate input
-    const errors = validateInput(username, email, password, fullName);
-    if (errors.length > 0) {
-      return res.status(400).json({ errors });
+    const validationErrors = validateSignupInputs({
+      username,
+      email,
+      password,
+      fullName,
+    });
+    if (validationErrors.length > 0) {
+      return res.status(400).json({ message: validationErrors.join(", ") });
     }
+
     // Check if the user  already exists
-    const existingUser = await User.findOne({ username, email });
+    const existingUser = await User.findOne({
+      $or: [{ username }, { email }],
+    });
+
     if (existingUser) {
       return res.status(400).json({ message: "user already exists" });
     }
@@ -36,14 +53,32 @@ const SignUp = async (req, res) => {
     // Create a new user
     const newUser = new User({
       username,
-      email,
+      email: email.trim().toLowerCase(),
       password,
       fullName,
       bio: req.body.bio || "",
       profilePicture: req.body.profilePicture || "",
     });
+
+    // generate verification token
+    const verificationToken = jwt.sign(
+      { id: newUser._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+    newUser.verificationToken = verificationToken;
     await newUser.save();
 
+    // send verification email
+    const verificationLink = `${process.env.APP_URL}/api/user/verify-email/${verificationToken}`;
+    const emailBody = `
+<h1>Welcome to Event Scheduler</h1>
+<p> Please verify your email address by clicking the link below:</p>
+<a href="${verificationLink}">Verify Email</a>
+<p>This Link will expire in 1 hour</p>
+<p>If you did not create an account, please ignore this email.</p>
+      `;
+    await sendEmail(newUser.email, "Verify your email address", emailBody);
     // Send a success response
     res.status(201).json({
       message: "User created successfully",
@@ -58,30 +93,28 @@ const SignUp = async (req, res) => {
     });
   } catch (error) {
     console.error("Error creating user:", error);
-    res.status(500).json({ message: "Internal server error" });
-
-    // Handle specific error cases
     res.status(500).json({
-      message: "Internal Server Error",
+      message: "Internal Server Errors",
       error: error.message,
     });
   }
 };
 
 const Login = async (req, res) => {
-  const { username, password } = req.body;
+  const { usermail, password } = req.body;
   try {
     // Validate input
-    if (!username || !password) {
-      return res
-        .status(400)
-        .json({ message: "Username and password are required" });
+    const validationErrors = validateLoginInput({ usermail, password });
+    if (validationErrors.length > 0) {
+      return res.status(400).json({ errors: validationErrors.join(", ") });
     }
 
-    //find user by username
-    const user = await User.findOne({ username });
+    //find user by username or email
+    const user = await User.findOne({
+      $or: [{ username: usermail.trim() }, { email: usermail.trim() }],
+    });
     if (!user) {
-      return res.status(404).json({ message: "User Not Found ⚡" });
+      return res.status(404).json({ message: "Invalid credentials" });
     }
     // Check if the password is correct
     const isMatch = await user.comparePassword(password);
@@ -108,8 +141,54 @@ const Login = async (req, res) => {
     });
   } catch (error) {
     console.error("Error logging in:", error);
+    if (error.name === " MongoServerError") {
+      return res
+        .status(503)
+        .json({ message: "Database error , Please try later" });
+    }
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
-export { SignUp, Login };
+const verifyEmail = async (req, res) => {
+  const { token } = req.params;
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id;
+    const user = await User.findOne({ _id: userId, verificationToken: token });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired token" });
+    }
+    user.isVerified = true;
+    user.verificationToken = null; // Clear the verification token after successful verification
+    await user.save();
+    res.status(200).json({
+      message: "Email verified successfully",
+    });
+  } catch (error) {
+    console.error("Error verifying email:", error);
+    if (error.name === "TokenExpiredError") {
+      return res.status(400).json({ message: "Token expired" });
+    }
+  }
+};
+
+const forgotPassword = async (req, res) => {
+  // Implement forgot password functionality
+};
+const resetPassword = async (req, res) => {
+  // Implement reset password functionality
+};
+const resendVerificationEmail = async (req, res) => {
+  // Implement resend verification email functionality
+};
+
+export {
+  SignUp,
+  Login,
+  verifyEmail,
+  forgotPassword,
+  resetPassword,
+  resendVerificationEmail,
+};
