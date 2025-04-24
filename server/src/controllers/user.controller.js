@@ -1,5 +1,6 @@
 import User from "../models/user.model.js";
 import validator from "validator";
+import jwt from "jsonwebtoken";
 
 const validateInput = (username, email, password, fullName) => {
   const errors = [];
@@ -68,9 +69,47 @@ const SignUp = async (req, res) => {
 };
 
 const Login = async (req, res) => {
-  res.status(200).json({
-    message: "Login successful",
-  });
+  const { username, password } = req.body;
+  try {
+    // Validate input
+    if (!username || !password) {
+      return res
+        .status(400)
+        .json({ message: "Username and password are required" });
+    }
+
+    //find user by username
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ message: "User Not Found ⚡" });
+    }
+    // Check if the password is correct
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    // Generate a token
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+    // Send a success response
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        fullName: user.fullName,
+        bio: user.bio,
+        profilePicture: user.profilePicture,
+      },
+    });
+  } catch (error) {
+    console.error("Error logging in:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
 
 export { SignUp, Login };
