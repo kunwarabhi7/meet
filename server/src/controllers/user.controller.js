@@ -1,7 +1,8 @@
 import User from "../models/user.model.js";
-import validator from "validator";
+
 import jwt from "jsonwebtoken";
 import { sendEmail } from "../utils/sendEmail.js";
+import blacklistModel from "../models/blacklist.model.js";
 
 const validateSignupInputs = ({ username, email, password, fullName }) => {
   const errors = [];
@@ -175,13 +176,91 @@ const verifyEmail = async (req, res) => {
 };
 
 const forgotPassword = async (req, res) => {
-  // Implement forgot password functionality
+  const { email } = req.body;
+  try {
+    if (!email || !validator.isEmail(email)) {
+      return res.status(400).json({ message: "Invalid email address" });
+    }
+    // Check if the user exists
+    const user = await User.findOne({ email: email.trim().toLowerCase() });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    // Generate a reset password token
+    const resetToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    await user.save();
+    // Send reset password email
+    const resetLink = `${process.env.APP_URL}/api/user/reset-password/${resetToken}`;
+    const emailBody = `
+      <h1>Reset Your Password</h1>
+      <p>Click the link below to reset your password:</p>
+            <a href="${resetLink}">Reset Password</a>
+
+      <p>This link will expire in 1 hour.</p>
+      <p>If you did not request a password reset, please ignore this email.</p>
+      `;
+    await sendEmail(user.email, "Reset your password", emailBody);
+    // Send a success response
+
+    res.status(200).json({
+      message: "Password reset email sent successfully",
+    });
+  } catch (error) {
+    console.error("Error in forgot password:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
 const resetPassword = async (req, res) => {
   // Implement reset password functionality
 };
 const resendVerificationEmail = async (req, res) => {
   // Implement resend verification email functionality
+};
+
+const logout = async (req, res) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  try {
+    // add blacklist token to database
+    await blacklistModel.create({ token });
+    res.status(200).json({ message: "Logged out successfully" });
+  } catch (error) {
+    console.error("Error logging out:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const getUser = async (req, res) => {
+  try {
+    const user = await User.findById({ _id: req.user.id }).select(
+      "-password -verificationToken -resetPasswordToken -resetPasswordExpires"
+    );
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({
+      message: "Users fetched successfully",
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        fullName: user.fullName,
+        bio: user.bio,
+        profilePicture: user.profilePicture,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
 
 export {
@@ -191,4 +270,6 @@ export {
   forgotPassword,
   resetPassword,
   resendVerificationEmail,
+  logout,
+  getUser,
 };
