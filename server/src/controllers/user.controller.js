@@ -1,8 +1,9 @@
 import User from "../models/user.model.js";
-
+import validator from "validator";
 import jwt from "jsonwebtoken";
 import { sendEmail } from "../utils/sendEmail.js";
 import blacklistModel from "../models/blacklist.model.js";
+import { validatePassword } from "../utils/validator.js";
 
 const validateSignupInputs = ({ username, email, password, fullName }) => {
   const errors = [];
@@ -215,7 +216,43 @@ const forgotPassword = async (req, res) => {
   }
 };
 const resetPassword = async (req, res) => {
-  // Implement reset password functionality
+  const { token } = req.params;
+  const { password } = req.body;
+  console.log("token", token, password);
+  try {
+    // validate password
+    const passwordErrors = validatePassword(password);
+    if (passwordErrors.length > 0) {
+      return res.status(400).json({ message: passwordErrors.join(", ") });
+    }
+    // Verify the token
+    const decode = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decode.id;
+
+    const user = await User.findOne({
+      _id: userId,
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired token" });
+    }
+
+    //update the password
+    user.password = password;
+    user.resetPasswordToken = null; // Clear the reset password token after successful reset
+    user.resetPasswordExpires = null; // Clear the reset password expiration time
+    await user.save();
+    res.status(200).json({
+      message: "Password reset successfully",
+    });
+  } catch (error) {
+    console.error("Error resetting password:", error);
+    if (error.name === "TokenExpiredError") {
+      return res.status(400).json({ message: "Token expired" });
+    }
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
 const resendVerificationEmail = async (req, res) => {
   // Implement resend verification email functionality
