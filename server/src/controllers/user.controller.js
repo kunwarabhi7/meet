@@ -3,33 +3,17 @@ import validator from "validator";
 import jwt from "jsonwebtoken";
 import { sendEmail } from "../utils/sendEmail.js";
 import blacklistModel from "../models/blacklist.model.js";
-import { validateEmail, validatePassword } from "../utils/validator.js";
-
-const validateSignupInputs = ({ username, email, password, fullName }) => {
-  const errors = [];
-  if (!username || username.length < 3) {
-    errors.push("Username must be at least 3 characters long.");
-  }
-  if (!email || !validator.isEmail(email)) {
-    errors.push("Invalid email address.");
-  }
-  if (!password || password.length < 6) {
-    errors.push("Password must be at least 6 characters long.");
-  }
-  if (!fullName || fullName.trim() === "" || fullName.length < 3) {
-    errors.push("Full name must be at least 3 characters long.");
-  }
-  return errors;
-};
-const validateLoginInput = ({ usermail, password }) => {
-  const errors = [];
-  if (!usermail || usermail.trim() === "")
-    errors.push("Username or email is required");
-  if (!password || password.trim() === "") errors.push("Password is required");
-  return errors;
-};
+import {
+  validateEmail,
+  validateLoginInput,
+  validatePassword,
+  validateSignupInputs,
+} from "../utils/validator.js";
 
 const SignUp = async (req, res) => {
+  if (!req.body) {
+    return res.status(400).json({ message: "Request body is missing" });
+  }
   const { username, email, password, fullName, bio, profilePicture } = req.body;
   try {
     // Validate input
@@ -103,6 +87,9 @@ const SignUp = async (req, res) => {
 };
 
 const Login = async (req, res) => {
+  if (!req.body) {
+    return res.status(400).json({ message: "Request body is missing" });
+  }
   const { usermail, password } = req.body;
   try {
     // Validate input

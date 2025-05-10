@@ -12,15 +12,27 @@ import {
 import { authMiddleware } from "../middleware/auth.middleware.js";
 
 const router = Router();
+import {
+  forgotPasswordLimiter,
+  loginLimiter,
+  resendVerificationLimiter,
+  resetPasswordLimiter,
+  signupLimiter,
+  verifyEmailLimiter,
+} from "../utils/rate.limit.js";
 
-router.post("/signup", SignUp);
-router.post("/login", Login);
+router.post("/signup", signupLimiter, SignUp);
+router.post("/login", loginLimiter, Login);
 router.post("/logout", logout);
 router.get("/profile", authMiddleware, getUser); // Assuming you have a function to get all users
-router.get("/verify-email/:token", verifyEmail);
-router.post("/forgot-password", forgotPassword);
-router.post("/reset-password/:token", resetPassword);
+router.get("/verify-email/:token", verifyEmailLimiter, verifyEmail);
+router.post("/forgot-password", forgotPasswordLimiter, forgotPassword);
+router.post("/reset-password/:token", resetPasswordLimiter, resetPassword);
 
-router.post("/resend-verification-email", resendVerificationEmail);
+router.post(
+  "/resend-verification-email",
+  resendVerificationLimiter,
+  resendVerificationEmail
+);
 
 export default router;
