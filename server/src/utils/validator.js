@@ -23,3 +23,14 @@ export const validatePassword = (password) => {
   }
   return errors;
 };
+
+export const validateEmail = (email) => {
+  const errors = [];
+  if (!email || validator.isEmpty(email.trim())) {
+    errors.push("Email is required");
+  }
+  if (!validator.isEmail(email)) {
+    errors.push("Invalid email format");
+  }
+  return errors;
+};

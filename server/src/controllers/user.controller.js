@@ -3,7 +3,7 @@ import validator from "validator";
 import jwt from "jsonwebtoken";
 import { sendEmail } from "../utils/sendEmail.js";
 import blacklistModel from "../models/blacklist.model.js";
-import { validatePassword } from "../utils/validator.js";
+import { validateEmail, validatePassword } from "../utils/validator.js";
 
 const validateSignupInputs = ({ username, email, password, fullName }) => {
   const errors = [];
@@ -255,7 +255,47 @@ const resetPassword = async (req, res) => {
   }
 };
 const resendVerificationEmail = async (req, res) => {
-  // Implement resend verification email functionality
+  const { email } = req.body;
+  try {
+    const emailErrors = validateEmail(email);
+    if (emailErrors.length > 0) {
+      return res.status(400).json({ message: emailErrors.join(", ") });
+    }
+    // Check if the user exists
+    const user = await User.findOne({ email: email.trim().toLowerCase() });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    // Check if the user is already verified
+    if (user.isVerified) {
+      return res.status(400).json({ message: "User already verified" });
+    }
+    // Generate a new verification token
+    const verificationToken = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+    user.verificationToken = verificationToken;
+    await user.save();
+    // Send verification email
+    const verificationLink = `${process.env.APP_URL}/api/user/verify-email/${verificationToken}`;
+    const emailBody = `
+    <h1>Welcome to Event Scheduler</h1>
+    <p> Please verify your email address by clicking the link below:</p>
+    <a href="${verificationLink}">Verify Email</a>
+    <p>This Link will expire in 1 hour</p>
+    <p>If you did not create an account, please ignore this email.</p>
+          `;
+    await sendEmail(user.email, "Verify your email address", emailBody);
+    // Send a success response
+    res.status(200).json({
+      message: "Verification email sent successfully",
+    });
+  } catch (error) {
+    console.error("Error resending verification email:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
 
 const logout = async (req, res) => {
