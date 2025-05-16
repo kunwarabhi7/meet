@@ -3,6 +3,12 @@ import validator from "validator";
 export const validatePassword = (password) => {
   const errors = [];
 
+  // Check if password is string
+  if (typeof password !== "string") {
+    errors.push("Password must be a string");
+    return errors; // Early return if password is not a string
+  }
+
   // Check if password is empty or contains only whitespace
   if (!password || validator.isEmpty(password.trim())) {
     errors.push("Password is required");
