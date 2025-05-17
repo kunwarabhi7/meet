@@ -8,10 +8,10 @@ const Login = () => {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm();
-  const navigate = useNavigate();
   const { Login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState(null);
+  const navigate = useNavigate();
 
   const onSubmit = async (data) => {
     try {
@@ -20,7 +20,7 @@ const Login = () => {
       navigate("/dashboard");
     } catch (error) {
       const errorMessage =
-        error.response?.data?.message || error.message || "An error occurred";
+        error.response?.data?.message || error.message || "Wrong credentials";
       setServerError(errorMessage);
     }
   };

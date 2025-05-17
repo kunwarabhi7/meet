@@ -43,6 +43,8 @@ export const AuthProvider = ({ children }) => {
 
       setUser(user);
       setToken(token);
+      console.log("Token before saving to localStorage:", token); // Debug log
+      console.log("User before saving to localStorage:", user); // Debug log
       localStorage.setItem("token", token);
     } catch (error) {
       throw error.response.data.message || "Login failed";
