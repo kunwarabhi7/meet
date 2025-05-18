@@ -43,34 +43,50 @@ export const AuthProvider = ({ children }) => {
 
       setUser(user);
       setToken(token);
-      console.log("Token before saving to localStorage:", token); // Debug log
-      console.log("User before saving to localStorage:", user); // Debug log
       localStorage.setItem("token", token);
+      return response.data;
     } catch (error) {
-      throw error.response.data.message || "Login failed";
+      console.log("Login error:", error.response?.data);
+      // Handle both errors and message fields
+      const errorData =
+        error.response?.data?.errors ||
+        error.response?.data?.message ||
+        "Login failed";
+      throw typeof errorData === "string"
+        ? errorData
+        : JSON.stringify(errorData);
     }
   };
 
-  const SignUp = async (username, password, fullname, email) => {
+  const SignUp = async (username, password, fullName, email) => {
     try {
       const response = await axios.post(
         "http://localhost:3000/api/user/signup",
         {
           username,
           password,
-          fullname,
+          fullName,
           email,
         }
       );
       const { token, user } = response.data;
+      console.log(response, "response");
       setUser(user);
       setToken(token);
       localStorage.setItem("token", token);
+      return response.data;
     } catch (error) {
-      throw error.response.data.message || "Sign up failed";
+      console.log("Signup error:", error.response?.data);
+      // Handle both errors and message fields
+      const errorData =
+        error.response?.data?.errors ||
+        error.response?.data?.message ||
+        "Sign up failed";
+      throw typeof errorData === "string"
+        ? errorData
+        : JSON.stringify(errorData);
     }
   };
-
   const Logout = async () => {
     try {
       await axios.post(

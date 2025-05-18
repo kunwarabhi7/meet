@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/Auth.Context";
 
 const Signup = () => {
   const {
@@ -12,17 +13,24 @@ const Signup = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  // Watch password for confirm password validation
+  const [serverError, setServerError] = useState(null);
+  const { SignUp } = useAuth();
   const password = watch("password");
 
   const onSubmit = async (data) => {
     try {
-      console.log("Signup Data:", data);
-      // Placeholder: Assuming signup is successful, navigate to login or dashboard
-      navigate("/login");
+      setServerError(null);
+      await SignUp(data.username, data.password, data.fullName, data.email);
+      console.log("Signup successful");
+      navigate("/verify-email");
     } catch (error) {
-      console.error("Signup failed:", error);
+      console.log("Frontend signup error:", error);
+      // Capitalize first letter for better UX
+      const errorMessage =
+        typeof error === "string"
+          ? error.charAt(0).toUpperCase() + error.slice(1)
+          : "Sign up failed";
+      setServerError(errorMessage);
     }
   };
 
@@ -33,9 +41,13 @@ const Signup = () => {
           Sign Up for Let's Meet
         </h2>
 
-        {/* Form */}
+        {serverError && (
+          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md animate-fade-in">
+            {serverError}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit(onSubmit)}>
-          {/* Full Name Field */}
           <div className="mb-4">
             <label
               htmlFor="fullName"
@@ -78,7 +90,6 @@ const Signup = () => {
             )}
           </div>
 
-          {/* Username Field */}
           <div className="mb-4">
             <label
               htmlFor="username"
@@ -94,7 +105,7 @@ const Signup = () => {
                 pattern: {
                   value: /^[a-zA-Z0-9_]{3,}$/,
                   message:
-                    "Username must be at least 3 characters long and can only contain letters, numbers, and underscores",
+                    "Username must be at least 3 characters and contain only letters, numbers, or underscores",
                 },
               })}
               className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 transition transform focus:scale-100 hover:scale-100 ${
@@ -122,7 +133,6 @@ const Signup = () => {
             )}
           </div>
 
-          {/* Email Field */}
           <div className="mb-4">
             <label
               htmlFor="email"
@@ -136,8 +146,8 @@ const Signup = () => {
               {...register("email", {
                 required: "Email is required",
                 pattern: {
-                  value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                  message: "Enter a valid email address",
+                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                  message: "Please enter a valid email address",
                 },
               })}
               className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 transition transform focus:scale-100 hover:scale-100 ${
@@ -165,7 +175,6 @@ const Signup = () => {
             )}
           </div>
 
-          {/* Password Field with Toggle */}
           <div className="mb-4 relative">
             <label
               htmlFor="password"
@@ -193,7 +202,7 @@ const Signup = () => {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-10 text-gray-600 hover:text-teal-600 text-sm"
+              className="absolute right-3 top-10 text-gray-600 hover:text-teal-700"
             >
               {showPassword ? "Hide" : "Show"}
             </button>
@@ -215,7 +224,6 @@ const Signup = () => {
             )}
           </div>
 
-          {/* Confirm Password Field with Toggle */}
           <div className="mb-6 relative">
             <label
               htmlFor="confirmPassword"
@@ -241,7 +249,7 @@ const Signup = () => {
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3 top-10 text-gray-600 hover:text-teal-600 text-sm"
+              className="absolute right-3 top-10 text-gray-600 hover:text-teal-700"
             >
               {showConfirmPassword ? "Hide" : "Show"}
             </button>
@@ -263,7 +271,6 @@ const Signup = () => {
             )}
           </div>
 
-          {/* Submit Button with Spinner */}
           <button
             type="submit"
             disabled={isSubmitting}
@@ -296,8 +303,6 @@ const Signup = () => {
             {isSubmitting ? "Signing Up..." : "Sign Up"}
           </button>
         </form>
-
-        {/* Additional Links */}
         <div className="mt-6 text-center">
           <p className="text-gray-600 text-sm animate-fade-in-up">
             Already have an account?{" "}

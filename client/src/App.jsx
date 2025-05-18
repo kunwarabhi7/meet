@@ -1,11 +1,4 @@
-import {
-  BrowserRouter,
-  Link,
-  Navigate,
-  Outlet,
-  Route,
-  Routes,
-} from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./components/Dashboard";
@@ -23,50 +16,41 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-const AppContent = () => {
-  const { user } = useAuth();
-  return (
-    <>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/forgot-password"
-          element={<div>Forgot Password Placeholder</div>}
-        />
-        <Route
-          path="/resend-verification"
-          element={<div>Resend Verification Placeholder</div>}
-        />
-      </Routes>
-      <Footer />
-    </>
-  );
-};
-
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <AppContent />
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/forgot-password"
+            element={<div>Forgot Password Placeholder</div>}
+          />
+          <Route
+            path="/resend-verification"
+            element={<div>Resend Verification Placeholder</div>}
+          />
+        </Routes>
+        <Footer />
       </BrowserRouter>
     </AuthProvider>
   );

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/Auth.Context";
+
 const Login = () => {
   const {
     register,
@@ -19,8 +20,12 @@ const Login = () => {
       await Login(data.usermail, data.password);
       navigate("/dashboard");
     } catch (error) {
+      console.log("Frontend login error:", error);
+      // Capitalize first letter for better UX
       const errorMessage =
-        error.response?.data?.message || error.message || "Wrong credentials";
+        typeof error === "string"
+          ? error.charAt(0).toUpperCase() + error.slice(1)
+          : "Login failed";
       setServerError(errorMessage);
     }
   };

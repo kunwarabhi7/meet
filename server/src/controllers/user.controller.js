@@ -14,6 +14,8 @@ const SignUp = async (req, res) => {
   if (!req.body) {
     return res.status(400).json({ message: "Request body is missing" });
   }
+  // console.log("Received signup data:", req.body);
+
   const { username, email, password, fullName, bio, profilePicture } = req.body;
   try {
     // Validate input
