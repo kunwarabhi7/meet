@@ -6,6 +6,7 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token") || null);
+  const [isLoading, setIsLoading] = useState(true); // New loading state
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -14,17 +15,17 @@ export const AuthProvider = ({ children }) => {
           const response = await axios.get(
             "http://localhost:3000/api/user/profile",
             {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
+              headers: { Authorization: `Bearer ${token}` },
             }
           );
-          setUser(response.data); // Assuming response.data is { user: { ... } }
+          console.log("Fetched User:", response.data); // Debug
+          setUser(response.data);
         } catch (error) {
-          console.error("Error fetching user data:", error);
+          console.error("Error fetching user data:", error.response?.data);
           Logout();
         }
       }
+      setIsLoading(false); // Set loading false after fetch
     };
     fetchUser();
   }, [token]);
@@ -39,9 +40,10 @@ export const AuthProvider = ({ children }) => {
         }
       );
       const { token, user } = response.data;
-      setUser({ user }); // Wrap user in object to match structure
+      setUser({ user });
       setToken(token);
       localStorage.setItem("token", token);
+      setIsLoading(false);
       return response.data;
     } catch (error) {
       console.log("Login error:", error.response?.data);
@@ -67,9 +69,10 @@ export const AuthProvider = ({ children }) => {
         }
       );
       const { token, user } = response.data;
-      setUser({ user }); // Wrap user in object
+      setUser({ user });
       setToken(token);
       localStorage.setItem("token", token);
+      setIsLoading(false);
       return response.data;
     } catch (error) {
       console.log("Signup error:", error.response?.data);
@@ -89,9 +92,7 @@ export const AuthProvider = ({ children }) => {
         "http://localhost:3000/api/user/logout",
         {},
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
     } catch (error) {
@@ -100,27 +101,34 @@ export const AuthProvider = ({ children }) => {
       setToken(null);
       setUser(null);
       localStorage.removeItem("token");
+      setIsLoading(false);
     }
   };
 
   const updateUser = async (userData) => {
     try {
+      console.log("Sending Payload:", userData);
       const response = await axios.put(
         "http://localhost:3000/api/user/profile",
-        userData, // { bio, fullName, profilePicture }
+        userData,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setUser({ user: response.data.user }); // Update with nested structure
-      return response.data; // Return for frontend to handle success
+      console.log("Backend Response:", response.data);
+      setUser({ user: response.data.user });
+      setIsLoading(false);
+      return response.data;
     } catch (error) {
-      console.log("Error updating user:", error.response?.data);
+      console.log(
+        "Error updating user:",
+        error.response?.data,
+        error.response?.status
+      );
       const errorData =
         error.response?.data?.errors ||
         error.response?.data?.message ||
+        error.message ||
         "Failed to update profile";
       throw typeof errorData === "string"
         ? errorData
@@ -129,7 +137,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, Login, Logout, SignUp, updateUser }}>
+    <AuthContext.Provider
+      value={{ user, Login, Logout, SignUp, updateUser, isLoading }}
+    >
       {children}
     </AuthContext.Provider>
   );

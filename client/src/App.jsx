@@ -1,20 +1,13 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./components/Dashboard";
 import Home from "./pages/Home";
 import Navbar from "./components/NavBar";
 import Footer from "./components/Footer";
-import { AuthProvider, useAuth } from "./context/Auth.Context";
+import { AuthProvider } from "./context/Auth.Context";
 import Profile from "./components/Profile";
-
-const ProtectedRoute = ({ children }) => {
-  const { user } = useAuth();
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-  return children;
-};
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -25,22 +18,10 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
+          <Route element={<ProtectedRoute />}>
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+          </Route>
           <Route
             path="/forgot-password"
             element={<div>Forgot Password Placeholder</div>}

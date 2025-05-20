@@ -5,7 +5,7 @@ import { useAuth } from "../context/Auth.Context";
 import imageCompression from "browser-image-compression";
 
 const Profile = () => {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, isLoading } = useAuth();
   const uservalue = user?.user;
   const navigate = useNavigate();
   const {
@@ -21,18 +21,18 @@ const Profile = () => {
   const [preview, setPreview] = useState(null);
 
   useEffect(() => {
-    console.log("User:", user);
-    if (!user) {
+    console.log("User:", user, "IsLoading:", isLoading);
+    if (!isLoading && !user) {
       navigate("/login");
-    } else {
+    } else if (user && uservalue) {
       reset({
-        bio: uservalue?.bio || "",
-        fullName: uservalue?.fullName || "",
+        bio: uservalue.bio || "",
+        fullName: uservalue.fullName || "",
         profilePicture: "",
       });
-      setPreview(uservalue?.profilePicture || null);
+      setPreview(uservalue.profilePicture || null);
     }
-  }, [user, navigate, reset, uservalue]);
+  }, [user, isLoading, navigate, reset, uservalue]);
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
@@ -50,16 +50,13 @@ const Profile = () => {
         return;
       }
       try {
-        // Compress image
         const options = {
-          maxSizeMB: 1, // Target size ~1MB
-          maxWidthOrHeight: 1024, // Resize to max 1024px
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1024,
           useWebWorker: true,
         };
         const compressedFile = await imageCompression(file, options);
         console.log("Compressed File Size:", compressedFile.size);
-
-        // Convert to base64
         const base64String = await new Promise((resolve, reject) => {
           const reader = new FileReader();
           reader.onloadend = () => resolve(reader.result);
@@ -121,14 +118,16 @@ const Profile = () => {
     }
   };
 
-  if (!user || !uservalue) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-teal-50 flex items-center justify-center">
-        <div className="text-teal-700 text-xl animate-pulse">
-          Loading profile...
-        </div>
+        <div className="text-teal-700 text-xl animate-pulse">Loading...</div>
       </div>
     );
+  }
+
+  if (!user || !uservalue) {
+    return null; // Avoid rendering until redirect
   }
 
   return (
@@ -137,7 +136,6 @@ const Profile = () => {
         <h2 className="text-3xl font-bold text-teal-700 mb-6 text-center animate-fade-in-down">
           Your Profile
         </h2>
-
         {serverError && (
           <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md animate-fade-in">
             {serverError}
@@ -148,7 +146,6 @@ const Profile = () => {
             {serverSuccess}
           </div>
         )}
-
         {!isEditing ? (
           <div className="space-y-4">
             <div className="flex justify-center">
