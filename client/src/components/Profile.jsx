@@ -2,78 +2,108 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/Auth.Context";
-import axios from "axios";
+import imageCompression from "browser-image-compression";
 
 const Profile = () => {
-  const { user, setUser } = useAuth();
-  console.log("User from context:", user);
-  const uservalue = user.user;
-
+  const { user, updateUser } = useAuth();
+  const uservalue = user?.user;
   const navigate = useNavigate();
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
+    setValue,
   } = useForm();
   const [isEditing, setIsEditing] = useState(false);
   const [serverError, setServerError] = useState(null);
   const [serverSuccess, setServerSuccess] = useState(null);
+  const [preview, setPreview] = useState(null);
 
-  // Fetch user details on mount if not available
   useEffect(() => {
+    console.log("User:", user);
     if (!user) {
-      const fetchUser = async () => {
-        try {
-          const response = await axios.get(
-            "http://localhost:3000/api/user/me",
-            {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-              },
-            }
-          );
-          setUser(response.data.user);
-        } catch (error) {
-          console.log("Fetch user error:", error.response?.data);
-          setServerError("Failed to fetch user details");
-          navigate("/login"); // Redirect to login if unauthorized
-        }
-      };
-      fetchUser();
+      navigate("/login");
+    } else {
+      reset({
+        bio: uservalue?.bio || "",
+        fullName: uservalue?.fullName || "",
+        profilePicture: "",
+      });
+      setPreview(uservalue?.profilePicture || null);
     }
-  }, [user, setUser, navigate]);
+  }, [user, navigate, reset, uservalue]);
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setServerError("Image size must not exceed 5MB");
+        return;
+      }
+      if (
+        !["image/jpeg", "image/jpg", "image/png", "image/gif"].includes(
+          file.type
+        )
+      ) {
+        setServerError("Only JPEG, JPG, PNG, or GIF images are allowed");
+        return;
+      }
+      try {
+        // Compress image
+        const options = {
+          maxSizeMB: 1, // Target size ~1MB
+          maxWidthOrHeight: 1024, // Resize to max 1024px
+          useWebWorker: true,
+        };
+        const compressedFile = await imageCompression(file, options);
+        console.log("Compressed File Size:", compressedFile.size);
+
+        // Convert to base64
+        const base64String = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = () => reject(new Error("Failed to read file"));
+          reader.readAsDataURL(compressedFile);
+        });
+        console.log("Base64 String:", base64String);
+        setValue("profilePicture", base64String);
+        setPreview(base64String);
+      } catch (error) {
+        console.error("Image Processing Error:", error);
+        setServerError("Failed to process image");
+      }
+    } else {
+      setValue("profilePicture", "");
+      setPreview(uservalue?.profilePicture || null);
+    }
+  };
 
   const onSubmit = async (data) => {
+    console.log("Form Data:", data);
     try {
       setServerError(null);
       setServerSuccess(null);
-      const response = await axios.put(
-        "http://localhost:3000/api/user/profile",
-        {
-          bio: data.bio,
-          profilePicture: data.profilePicture,
-        },
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      );
-      setUser(response.data.user);
-      setServerSuccess("Profile updated successfully");
+      const payload = {
+        bio: data.bio,
+        fullName: data.fullName,
+      };
+      if (data.profilePicture && data.profilePicture.startsWith("data:image")) {
+        payload.profilePicture = data.profilePicture;
+      }
+      console.log("Payload to updateUser:", payload);
+      const response = await updateUser(payload);
+      setServerSuccess(response.message);
       setIsEditing(false);
       reset({
-        bio: response.data.user.bio,
-        profilePicture: response.data.user.profilePicture,
+        bio: response.user.bio,
+        fullName: response.user.fullName,
+        profilePicture: "",
       });
+      setPreview(response.user.profilePicture);
     } catch (error) {
-      console.log("Update profile error:", error.response?.data);
-      const errorMessage =
-        error.response?.data?.errors ||
-        error.response?.data?.message ||
-        "Failed to update profile";
-      setServerError(
-        errorMessage.charAt(0).toUpperCase() + errorMessage.slice(1)
-      );
+      console.log("Update profile error:", error);
+      setServerError(error.charAt(0).toUpperCase() + error.slice(1));
     }
   };
 
@@ -81,13 +111,17 @@ const Profile = () => {
     setIsEditing(!isEditing);
     setServerError(null);
     setServerSuccess(null);
-    if (!isEditing && user) {
-      reset({ bio: user.bio, profilePicture: user.profilePicture });
+    if (!isEditing && uservalue) {
+      reset({
+        bio: uservalue.bio || "",
+        fullName: uservalue.fullName || "",
+        profilePicture: "",
+      });
+      setPreview(uservalue.profilePicture || null);
     }
   };
 
-  // Loading state
-  if (!user) {
+  if (!user || !uservalue) {
     return (
       <div className="min-h-screen bg-teal-50 flex items-center justify-center">
         <div className="text-teal-700 text-xl animate-pulse">
@@ -120,7 +154,7 @@ const Profile = () => {
             <div className="flex justify-center">
               <img
                 src={
-                  uservalue?.profilePicture || "https://via.placeholder.com/150"
+                  uservalue.profilePicture || "https://via.placeholder.com/150"
                 }
                 alt="Profile"
                 className="w-32 h-32 rounded-full object-cover border-2 border-teal-500"
@@ -130,26 +164,26 @@ const Profile = () => {
               <label className="block text-gray-700 text-sm font-medium mb-1">
                 Full Name
               </label>
-              <p className="text-gray-900 text-lg">{uservalue?.fullName}</p>
+              <p className="text-gray-900 text-lg">{uservalue.fullName}</p>
             </div>
             <div>
               <label className="block text-gray-700 text-sm font-medium mb-1">
                 Username
               </label>
-              <p className="text-gray-900 text-lg">{uservalue?.username}</p>
+              <p className="text-gray-900 text-lg">{uservalue.username}</p>
             </div>
             <div>
               <label className="block text-gray-700 text-sm font-medium mb-1">
                 Email
               </label>
-              <p className="text-gray-900 text-lg">{uservalue?.email}</p>
+              <p className="text-gray-900 text-lg">{uservalue.email}</p>
             </div>
             <div>
               <label className="block text-gray-700 text-sm font-medium mb-1">
                 Bio
               </label>
               <p className="text-gray-900 text-lg">
-                {uservalue?.bio || "No bio provided"}
+                {uservalue.bio || "No bio provided"}
               </p>
             </div>
             <button
@@ -163,10 +197,53 @@ const Profile = () => {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="flex justify-center">
               <img
-                src={user.profilePicture || "https://via.placeholder.com/150"}
-                alt="Profile"
+                src={
+                  preview ||
+                  uservalue.profilePicture ||
+                  "https://via.placeholder.com/150"
+                }
+                alt="Profile Preview"
                 className="w-32 h-32 rounded-full object-cover border-2 border-teal-500 mb-4"
               />
+            </div>
+            <div>
+              <label
+                htmlFor="fullName"
+                className="block text-gray-700 text-sm font-medium mb-2"
+              >
+                Full Name
+              </label>
+              <input
+                id="fullName"
+                {...register("fullName", {
+                  minLength: {
+                    value: 3,
+                    message: "Full name must be at least 3 characters",
+                  },
+                })}
+                className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 transition transform focus:scale-100 hover:scale-100 ${
+                  errors.fullName
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-gray-300"
+                }`}
+                placeholder="Enter full name"
+              />
+              {errors.fullName && (
+                <div className="mt-1 flex items-center text-red-600 text-sm animate-fade-in">
+                  <svg
+                    className="w-4 h-4 mr-1"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {errors.fullName.message}
+                </div>
+              )}
             </div>
             <div>
               <label
@@ -213,41 +290,16 @@ const Profile = () => {
                 htmlFor="profilePicture"
                 className="block text-gray-700 text-sm font-medium mb-2"
               >
-                Profile Picture URL
+                Profile Picture
               </label>
               <input
-                type="text"
+                type="file"
                 id="profilePicture"
-                {...register("profilePicture", {
-                  pattern: {
-                    value: /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|svg))$/i,
-                    message:
-                      "Enter a valid image URL (png, jpg, jpeg, gif, svg)",
-                  },
-                })}
-                className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 transition transform focus:scale-100 hover:scale-100 ${
-                  errors.profilePicture
-                    ? "border-red-500 focus:ring-red-500"
-                    : "border-gray-300"
-                }`}
-                placeholder="Enter image URL"
+                accept="image/jpeg,image/jpg,image/png,image/gif"
+                onChange={handleFileChange}
+                className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 transition transform focus:scale-100 hover:scale-100 border-gray-300"
               />
-              {errors.profilePicture && (
-                <div className="mt-1 flex items-center text-red-600 text-sm animate-fade-in">
-                  <svg
-                    className="w-4 h-4 mr-1"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  {errors.profilePicture.message}
-                </div>
-              )}
+              <input type="hidden" {...register("profilePicture")} />
             </div>
             <div className="flex space-x-4">
               <button
