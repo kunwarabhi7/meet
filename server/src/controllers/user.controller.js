@@ -329,6 +329,79 @@ const getUser = async (req, res) => {
   }
 };
 
+const updateProfile = async (req, res) => {
+  try {
+    const { fullName, bio, profilePicture } = req.body;
+    const validationError = [];
+    if (bio && bio.length > 200) {
+      validationError.push("Bio must be less than 200 characters");
+    }
+    if (
+      fullName &&
+      typeof fullName !== "string" &&
+      fullName.trim().length < 3
+    ) {
+      validationError.push(
+        "Full name must be a string and at least 3 characters long"
+      );
+    }
+    if (profilePicture) {
+      // validate base64 image
+      const base64Regex = /^data:image\/[a-zA-Z]+;base64,[A-Za-z0-9+/=]+$/;
+      if (!base64Regex.test(profilePicture)) {
+        validationError.push(
+          "Profile picture must be a valid base64 image (jpeg,jpg, png, gif)"
+        );
+      } else {
+        // check size (base64 string size * 3 / 4 = binary size)
+        const base64Data = profilePicture.split(",")[1];
+        const sizeInBytes =
+          (base64Data.length * 3) / 4 -
+          (base64Data.endsWith("==") ? 2 : base64Data.endsWith("=") ? 1 : 0);
+        if (sizeInBytes > 5 * 1024 * 1024) {
+          // 5 MB
+          validationError.push("Profile picture must be less than 5 MB");
+        }
+        if (validationError.length > 0) {
+          return res.status(400).json({ message: validationError.join(", ") });
+        }
+        // prepare update object
+        const updateData = {};
+        if (bio !== undefined) updateData.bio = bio;
+        if (fullName !== undefined) updateData.fullName = fullName.trim();
+        if (profilePicture !== undefined)
+          updateData.profilePicture = profilePicture;
+        // update user
+        const updatedUser = await User.findByIdAndUpdate(
+          req.user.id,
+          updateData,
+          { new: true, runValidators: true }
+        ).select(
+          "-password -verificationToken -resetPasswordToken -resetPasswordExpires"
+        );
+        if (!updatedUser) {
+          return res.status(404).json({ message: "User not found" });
+        }
+        //success response
+        res.status(200).json({
+          message: "User updated successfully",
+          user: {
+            id: updatedUser._id,
+            username: updatedUser.username,
+            email: updatedUser.email,
+            fullName: updatedUser.fullName,
+            bio: updatedUser.bio,
+            profilePicture: updatedUser.profilePicture,
+          },
+        });
+      }
+    }
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 export {
   SignUp,
   Login,
@@ -338,4 +411,5 @@ export {
   resendVerificationEmail,
   logout,
   getUser,
+  updateProfile,
 };

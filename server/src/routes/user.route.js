@@ -7,6 +7,7 @@ import {
   resendVerificationEmail,
   resetPassword,
   SignUp,
+  updateProfile,
   verifyEmail,
 } from "../controllers/user.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
@@ -34,5 +35,7 @@ router.post(
   resendVerificationLimiter,
   resendVerificationEmail
 );
+
+router.put("/profile", authMiddleware, updateProfile);
 
 export default router;
