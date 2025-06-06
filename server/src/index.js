@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 import connectDB from "./utils/connecttodb.js";
 import userRoute from "./routes/user.route.js";
-
+import eventRoute from "./routes/event.route.js";
 dotenv.config();
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -15,6 +15,7 @@ app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
 // API routes
 app.use("/api/user", userRoute);
+app.use("/api/event", eventRoute);
 
 // Root route
 app.get("/", (req, res) => {
