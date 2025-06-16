@@ -9,6 +9,7 @@ import {
   validatePassword,
   validateSignupInputs,
 } from "../utils/validator.js";
+import { getVerificationEmail } from "../utils/createEventTemplate.js";
 
 const SignUp = async (req, res) => {
   if (!req.body) {
@@ -59,14 +60,14 @@ const SignUp = async (req, res) => {
 
     // send verification email
     const verificationLink = `${process.env.APP_URL}/api/user/verify-email/${verificationToken}`;
-    const emailBody = `
-<h1>Welcome to Event Scheduler</h1>
-<p> Please verify your email address by clicking the link below:</p>
-<a href="${verificationLink}">Verify Email</a>
-<p>This Link will expire in 1 hour</p>
-<p>If you did not create an account, please ignore this email.</p>
-      `;
-    await sendEmail(newUser.email, "Verify your email address", emailBody);
+    const emailSubject = "🎉 Verify Your Email Address";
+    const emailHtml = getVerificationEmail({
+      name: fullName, // Use fullName as name
+      verificationLink,
+    });
+
+    await sendEmail(newUser.email, emailSubject, emailHtml);
+
     // Send a success response
     res.status(201).json({
       message: "User created successfully",

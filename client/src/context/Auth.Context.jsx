@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
         }
       );
       const { token, user } = response.data;
-      setUser({ user });
+      setUser(user);
       setToken(token);
       localStorage.setItem("token", token);
       setIsLoading(false);
@@ -69,7 +69,7 @@ export const AuthProvider = ({ children }) => {
         }
       );
       const { token, user } = response.data;
-      setUser({ user });
+      setUser(user);
       setToken(token);
       localStorage.setItem("token", token);
       setIsLoading(false);
@@ -116,7 +116,7 @@ export const AuthProvider = ({ children }) => {
         }
       );
       console.log("Backend Response:", response.data);
-      setUser({ user: response.data.user });
+      setUser(response.data.user);
       setIsLoading(false);
       return response.data;
     } catch (error) {
@@ -138,7 +138,15 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, Login, Logout, SignUp, updateUser, isLoading }}
+      value={{
+        user,
+        Login,
+        Logout,
+        SignUp,
+        updateUser,
+        isLoading,
+        token,
+      }}
     >
       {children}
     </AuthContext.Provider>

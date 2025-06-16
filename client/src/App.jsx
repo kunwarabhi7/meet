@@ -9,35 +9,42 @@ import { AuthProvider, useAuth } from "./context/Auth.Context";
 import Profile from "./components/Profile";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { PublicRoute } from "./components/PublicRoutes";
+import { EventProvider } from "./context/Event.Context";
+import CreateEvent from "./components/CreateEvent";
+import ViewEvent from "./components/ViewEvent";
 
 // New PublicRoute component
 
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route element={<PublicRoute />}>
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-          </Route>
-          <Route element={<ProtectedRoute />}>
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-          </Route>
-          <Route
-            path="/forgot-password"
-            element={<div>Forgot Password Placeholder</div>}
-          />
-          <Route
-            path="/resend-verification"
-            element={<div>Resend Verification Placeholder</div>}
-          />
-        </Routes>
-        <Footer />
-      </BrowserRouter>
+      <EventProvider>
+        <BrowserRouter>
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route element={<PublicRoute />}>
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+            </Route>
+            <Route element={<ProtectedRoute />}>
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/create-event" element={<CreateEvent />} />
+              <Route path="/event/:eventId" element={<ViewEvent />} />
+            </Route>
+            <Route
+              path="/forgot-password"
+              element={<div>Forgot Password Placeholder</div>}
+            />
+            <Route
+              path="/resend-verification"
+              element={<div>Resend Verification Placeholder</div>}
+            />
+          </Routes>
+          <Footer />
+        </BrowserRouter>
+      </EventProvider>
     </AuthProvider>
   );
 }

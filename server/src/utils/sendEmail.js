@@ -8,9 +8,13 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+  tls: {
+    rejectUnauthorized: process.env.NODE_ENV === "production", // ✅ production me true, local me false
+  },
 });
+console.log(process.env.NODE_ENV, "NODE_ENV");
 
-//verify transporter configuration on startup
+// Verify transporter configuration on startup
 transporter.verify((error, success) => {
   if (error) {
     console.error("Error verifying email transporter:", error);
@@ -21,7 +25,7 @@ transporter.verify((error, success) => {
 
 export const sendEmail = async (to, subject, html) => {
   try {
-    //validate email address
+    // Validate email address
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
       throw new Error("Email configuration is missing.");
     }
@@ -32,12 +36,14 @@ export const sendEmail = async (to, subject, html) => {
       subject,
       html,
     });
+
     console.log(
       "Email sent successfully to:",
       to,
       "Message ID:",
       info.messageId
     );
+
     return info;
   } catch (error) {
     console.error("Error sending email:", error);
