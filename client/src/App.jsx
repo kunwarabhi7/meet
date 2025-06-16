@@ -12,6 +12,7 @@ import { PublicRoute } from "./components/PublicRoutes";
 import { EventProvider } from "./context/Event.Context";
 import CreateEvent from "./components/CreateEvent";
 import ViewEvent from "./components/ViewEvent";
+import EditEvent from "./components/EditEvent";
 
 // New PublicRoute component
 
@@ -32,6 +33,7 @@ function App() {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/create-event" element={<CreateEvent />} />
               <Route path="/event/:eventId" element={<ViewEvent />} />
+              <Route path="/event/:eventId/edit" element={<EditEvent />} />
             </Route>
             <Route
               path="/forgot-password"

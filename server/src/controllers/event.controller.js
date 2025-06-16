@@ -2,7 +2,10 @@ import { Event } from "../models/event.model.js";
 import User from "../models/user.model.js";
 import { createEventTemplate } from "../utils/createEventTemplate.js";
 
-import { validateCreateEvent } from "../utils/eventValidator.js";
+import {
+  validateCreateEvent,
+  validateUpdateEvent,
+} from "../utils/eventValidator.js";
 import { sendEmail } from "../utils/sendEmail.js";
 
 export const getAllEvents = async (req, res) => {
@@ -121,31 +124,49 @@ export const createEvent = async (req, res) => {
 };
 
 export const updateEvent = async (req, res) => {
-  const updateField = req.body;
+  const updateFields = req.body;
   const { eventId } = req.params;
-  if (Object.keys(updateField).length === 0) {
-    return res.status(400).json({
-      message: "Update atleast one field",
-    });
+  const userId = req.user?.id;
+
+  console.log("Request body:", updateFields);
+
+  const errors = validateUpdateEvent(updateFields);
+  if (errors.length > 0) {
+    return res.status(400).json({ message: "Validation failed", errors });
   }
+
   try {
-    const updateEvent = await Event.findByIdAndUpdate(
-      eventId,
-      { $set: updateField },
-      { new: true }
+    const event = await Event.findById(eventId).populate(
+      "organizer",
+      "_id username fullName profilePicture"
     );
-    if (!updateEvent) {
-      return res.status(400).json({ message: "Event Not Found" });
+    if (!event) {
+      return res.status(404).json({
+        errors: [{ message: "Event not found" }],
+      });
     }
 
-    return res
-      .status(200)
-      .json({ message: "Event Updated Successfully", event: updateEvent });
+    if (!userId || event.organizer._id.toString() !== userId) {
+      return res.status(403).json({
+        errors: [{ message: "You are not authorized to update this event" }],
+      });
+    }
+
+    const updatedEvent = await Event.findByIdAndUpdate(
+      eventId,
+      { $set: updateFields },
+      { new: true, runValidators: true }
+    ).populate("organizer", "_id username fullName profilePicture");
+
+    return res.status(200).json({
+      message: "Event updated successfully",
+      event: updatedEvent,
+    });
   } catch (error) {
-    console.error("Error Updating event", error);
-    res.status(500).json({
+    console.error("Error updating event:", error);
+    return res.status(500).json({
       message: "Internal server error",
-      error: error.message,
+      errors: [{ message: error.message }],
     });
   }
 };
