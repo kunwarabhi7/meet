@@ -25,7 +25,7 @@ import {
 router.post("/signup", signupLimiter, SignUp);
 router.post("/login", loginLimiter, Login);
 router.post("/logout", logout);
-router.get("/profile", authMiddleware, getUser); // Assuming you have a function to get all users
+router.get("/profile", authMiddleware, getUser);
 router.get("/verify-email/:token", verifyEmailLimiter, verifyEmail);
 router.post("/forgot-password", forgotPasswordLimiter, forgotPassword);
 router.post("/reset-password/:token", resetPasswordLimiter, resetPassword);

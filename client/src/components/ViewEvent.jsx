@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { useEvent } from "../context/Event.Context";
 import { useAuth } from "../context/Auth.Context";
+import axios from "axios";
 
 const ViewEvent = () => {
   const { eventId } = useParams();
@@ -15,7 +16,7 @@ const ViewEvent = () => {
   const { user, isLoading: isAuthLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const hasFetchedRef = useRef(false); // Track fetch status
+  const hasFetchedRef = useRef(false);
 
   useEffect(() => {
     if (
@@ -23,7 +24,7 @@ const ViewEvent = () => {
       event?._id === eventId &&
       !location.state?.fromEdit
     ) {
-      return; // Skip if already fetched and no edit redirect
+      return;
     }
 
     const loadEvent = async () => {
@@ -41,17 +42,60 @@ const ViewEvent = () => {
 
   useEffect(() => {
     console.log("User:", JSON.stringify(user, null, 2));
-    console.log("Event Organizer:", JSON.stringify(event?.organizer, null, 2));
+    console.log("Event:", JSON.stringify(event, null, 2));
     console.log(
       "isOrganizer:",
-      user?.user?.id &&
+      user?.id &&
         event?.organizer?._id &&
-        user.user.id.toString() === event.organizer._id.toString()
+        user.id.toString() === event.organizer._id.toString()
     );
-    console.log("User ID:", user?.user?.id);
-    console.log("Organizer ID:", event?.organizer?._id);
+    console.log("User ID:", user?._id || "undefined");
+    console.log("Organizer ID:", event?.organizer?._id || "undefined");
     console.log("isAuthLoading:", isAuthLoading);
+    console.log("Token:", localStorage.getItem("token") || "no token");
+    if (!user && !isAuthLoading && localStorage.getItem("token")) {
+      console.log("User null but token exists, possible auth issue");
+    }
   }, [user, event, isAuthLoading]);
+
+  const handleJoinEvent = async () => {
+    const token = localStorage.getItem("token");
+    if (!token || !user) {
+      alert("Please login first 😏");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      console.log(
+        "Frontend - Joining event with token:",
+        token.slice(0, 20) + "..."
+      );
+      console.log("Frontend - Event ID:", eventId);
+      const response = await axios.post(
+        `http://localhost:3000/api/event/${eventId}/join`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert(response.data.message);
+      await fetchEventById(eventId, true);
+    } catch (error) {
+      console.error("Join event error:", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
+      const errorMsg = error.response?.data?.error || "Something went wrong 😔";
+      if (error.response?.status === 401) {
+        alert("Session expired, please login again 😏");
+        navigate("/login");
+      } else if (error.response?.status === 404) {
+        alert("Event not found 😔");
+      } else {
+        alert(errorMsg);
+      }
+    }
+  };
 
   const handleDelete = async () => {
     if (window.confirm("Are you sure you want to delete this event?")) {
@@ -85,9 +129,9 @@ const ViewEvent = () => {
   };
 
   const isOrganizer =
-    user?.user?.id &&
+    user?.id &&
     event?.organizer?._id &&
-    user.user.id.toString() === event.organizer._id.toString();
+    user.id.toString() === event.organizer._id.toString();
 
   return (
     <div className="min-h-screen bg-teal-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -120,7 +164,7 @@ const ViewEvent = () => {
           !error?.length && (
             <div className="text-center bg-gray-100 p-6 rounded-lg animate-fade-in">
               <p className="text-gray-600 text-lg">
-                Failed to load user or event data.
+                Failed to load user or event data. Please login.
               </p>
               <Link
                 to="/login"
@@ -186,6 +230,9 @@ const ViewEvent = () => {
                     <span className="font-medium">Last Updated:</span>{" "}
                     {event.updatedAt ? formatTimestamp(event.updatedAt) : "N/A"}
                   </p>
+                  <p className="text-gray-600">
+                    <span className="font-medium">Spots Left:</span> 2
+                  </p>
                 </div>
               </div>
 
@@ -227,12 +274,12 @@ const ViewEvent = () => {
                 ) : (
                   <button
                     className={`px-4 py-2 rounded-md text-white font-medium ${
-                      isEventLoading || isAuthLoading
+                      isEventLoading || isAuthLoading || !user
                         ? "bg-amber-400 cursor-not-allowed"
                         : "bg-amber-500 hover:bg-amber-600"
                     } transition`}
-                    disabled={isEventLoading || isAuthLoading}
-                    onClick={() => alert("Join Event feature coming soon!")}
+                    disabled={isEventLoading || isAuthLoading || !user}
+                    onClick={handleJoinEvent}
                   >
                     Join Event
                   </button>

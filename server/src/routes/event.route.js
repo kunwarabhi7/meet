@@ -4,6 +4,7 @@ import {
   deleteEvent,
   getAllEvents,
   getEventById,
+  joinEvent,
   updateEvent,
 } from "../controllers/event.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
@@ -15,5 +16,6 @@ router.post("/", authMiddleware, createEvent);
 router.get("/:eventId", authMiddleware, getEventById);
 router.put("/:eventId", authMiddleware, updateEvent);
 router.delete("/:eventId", authMiddleware, deleteEvent);
+router.post("/:eventId/join", authMiddleware, joinEvent);
 
 export default router;

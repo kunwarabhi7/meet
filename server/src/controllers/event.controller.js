@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Event } from "../models/event.model.js";
 import User from "../models/user.model.js";
 import { createEventTemplate } from "../utils/createEventTemplate.js";
@@ -33,6 +34,17 @@ export const getAllEvents = async (req, res) => {
 
 export const createEvent = async (req, res) => {
   const { name, date, time, location, description, maxAttendees } = req.body;
+  const userId = req.user?.id; // Use req.user.id
+
+  // Debug: Log userId
+  console.log("createEvent - User ID:", userId);
+
+  // Check if user is authenticated
+  if (!userId) {
+    return res
+      .status(401)
+      .json({ error: "User not authenticated, please login 😔" });
+  }
 
   // Validate input
   const errors = validateCreateEvent({
@@ -59,11 +71,11 @@ export const createEvent = async (req, res) => {
         .padStart(2, "0")}:00Z`
     );
 
-    // Check for duplicate event (name + date + organizer)
+    // Check for duplicate event
     const existingEvent = await Event.findOne({
       name: name.trim(),
       eventDate,
-      organizer: req.user.id,
+      organizer: userId,
     });
     if (existingEvent) {
       return res.status(400).json({
@@ -80,16 +92,15 @@ export const createEvent = async (req, res) => {
       location,
       description,
       maxAttendees,
-      organizer: req.user.id,
+      organizer: userId,
     });
 
     await event.save();
 
-    // Fetch user email from database
-    const user = await User.findById(req.user.id).select("email");
+    // Fetch user email
+    const user = await User.findById(userId).select("email");
     if (!user || !user.email) {
-      console.error("User or email not found for id:", req.user.id);
-      // Don't fail the request, just log and proceed
+      console.error("User or email not found for id:", userId);
       return res.status(201).json({
         message:
           "Event created successfully, but email not sent due to missing user email",
@@ -97,9 +108,8 @@ export const createEvent = async (req, res) => {
       });
     }
 
-    // Send confirmation email to organizer
+    // Send confirmation email
     const emailSubject = "🎉 Your Event Has Been Created!";
-
     const emailHtml = createEventTemplate({
       name: event.name,
       date: event.eventDate.toLocaleDateString(),
@@ -116,7 +126,10 @@ export const createEvent = async (req, res) => {
       event,
     });
   } catch (error) {
-    console.error("Error creating event:", error);
+    console.error("Error creating event:", {
+      error: error.message,
+      stack: error.stack,
+    });
     return res
       .status(500)
       .json({ message: "Internal server error", error: error.message });
@@ -209,5 +222,75 @@ export const getEventById = async (req, res) => {
     res.status(500).json({
       errors: [{ message: `Error fetching event: ${error.message}` }],
     });
+  }
+};
+
+export const joinEvent = async (req, res) => {
+  try {
+    const eventId = req.params.eventId;
+    const userId = req.user?.id;
+
+    console.log("joinEvent - Params and User:", {
+      eventId,
+      userId,
+      user: req.user,
+    });
+
+    if (!userId) {
+      return res
+        .status(401)
+        .json({ error: "User not authenticated, please login 😔" });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(eventId)) {
+      return res.status(400).json({ error: "Invalid event ID 😔" });
+    }
+
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res.status(404).json({ error: "No event found 😔" });
+    }
+
+    // Check if user is the organizer
+    if (event.organizer.toString() === userId.toString()) {
+      return res.status(400).json({
+        error: "You are the organizer, you cannot join your own event 😅",
+      });
+    }
+
+    if (!Array.isArray(event.attendees)) {
+      event.attendees = [];
+    }
+
+    if (event.attendees.includes(userId)) {
+      return res
+        .status(400)
+        .json({ error: "You are already joined the event 😅" });
+    }
+
+    if (event.attendees.length >= event.maxAttendees) {
+      return res.status(400).json({ error: "Event is already full, sorry 😔" });
+    }
+
+    const updatedEvent = await Event.findByIdAndUpdate(
+      eventId,
+      { $addToSet: { attendees: userId }, $inc: { maxAttendees: -1 } },
+      { new: true }
+    );
+
+    return res.status(200).json({
+      message: "Congratulations, you successfully joined the event 🎉",
+      event: updatedEvent,
+    });
+  } catch (error) {
+    console.error("Internal Server Error in joinEvent:", {
+      error: error.message,
+      stack: error.stack,
+      eventId,
+      userId,
+    });
+    return res
+      .status(500)
+      .json({ error: "Something went wrong, try again later 😔" });
   }
 };

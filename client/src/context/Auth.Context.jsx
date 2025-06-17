@@ -6,32 +6,45 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token") || null);
-  const [isLoading, setIsLoading] = useState(true); // New loading state
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchUser = async () => {
       if (token) {
         try {
+          console.log("Fetching user with token:", token.slice(0, 20) + "...");
           const response = await axios.get(
             "http://localhost:3000/api/user/profile",
             {
               headers: { Authorization: `Bearer ${token}` },
             }
           );
-          console.log("Fetched User:", response.data); // Debug
-          setUser(response.data);
+          console.log("Fetched User:", JSON.stringify(response.data, null, 2));
+          console.log("Response shape on /profile:", response.data);
+
+          setUser(response.data.user);
         } catch (error) {
-          console.error("Error fetching user data:", error.response?.data);
-          Logout();
+          console.error("Error fetching user data:", {
+            message: error.message,
+            status: error.response?.status,
+            data: error.response?.data,
+          });
+          setUser(null);
+          setToken(null);
+          localStorage.removeItem("token");
+          console.log("Cleared token due to fetch error");
         }
+      } else {
+        console.log("No token found in localStorage");
       }
-      setIsLoading(false); // Set loading false after fetch
+      setIsLoading(false);
     };
     fetchUser();
   }, [token]);
 
   const Login = async (usermail, password) => {
     try {
+      console.log("Logging in with:", { usermail });
       const response = await axios.post(
         "http://localhost:3000/api/user/login",
         {
@@ -40,13 +53,19 @@ export const AuthProvider = ({ children }) => {
         }
       );
       const { token, user } = response.data;
+      console.log("Login - User:", JSON.stringify(user, null, 2));
+      console.log("Login - Token:", token.slice(0, 20) + "...");
       setUser(user);
       setToken(token);
       localStorage.setItem("token", token);
       setIsLoading(false);
       return response.data;
     } catch (error) {
-      console.log("Login error:", error.response?.data);
+      console.error("Login error:", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
       const errorData =
         error.response?.data?.errors ||
         error.response?.data?.message ||
@@ -69,13 +88,14 @@ export const AuthProvider = ({ children }) => {
         }
       );
       const { token, user } = response.data;
+      console.log("SignUp - User:", JSON.stringify(user, null, 2)); // Debug
       setUser(user);
       setToken(token);
       localStorage.setItem("token", token);
       setIsLoading(false);
       return response.data;
     } catch (error) {
-      console.log("Signup error:", error.response?.data);
+      console.error("Signup error:", error.response?.data || error.message);
       const errorData =
         error.response?.data?.errors ||
         error.response?.data?.message ||
@@ -115,15 +135,14 @@ export const AuthProvider = ({ children }) => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log("Backend Response:", response.data);
+      console.log("Backend Response:", JSON.stringify(response.data, null, 2));
       setUser(response.data.user);
       setIsLoading(false);
       return response.data;
     } catch (error) {
-      console.log(
+      console.error(
         "Error updating user:",
-        error.response?.data,
-        error.response?.status
+        error.response?.data || error.message
       );
       const errorData =
         error.response?.data?.errors ||

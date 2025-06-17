@@ -15,10 +15,12 @@ export const authMiddleware = async (req, res, next) => {
     if (isBlacklisted) {
       return res.status(401).json({ message: "Token is blacklisted" });
     }
-    //verify the token
-    jwt.verify(token, process.env.JWT_SECRET);
-    req.user = jwt.decode(token); // Decode the token to get user info
-    next(); // Call the next middleware or route handler
+
+    // Verify and decode token in one step
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = { id: decoded._id };
+
+    next();
   } catch (error) {
     console.error("Error verifying token:", error);
     if (error.name === "JsonWebTokenError") {

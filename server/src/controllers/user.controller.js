@@ -93,32 +93,33 @@ const Login = async (req, res) => {
   if (!req.body) {
     return res.status(400).json({ message: "Request body is missing" });
   }
+
   const { usermail, password } = req.body;
+
   try {
-    // Validate input
     const validationErrors = validateLoginInput({ usermail, password });
     if (validationErrors.length > 0) {
       return res.status(400).json({ errors: validationErrors.join(", ") });
     }
 
-    //find user by username or email
     const user = await User.findOne({
       $or: [{ username: usermail.trim() }, { email: usermail.trim() }],
     });
+
     if (!user) {
       return res.status(404).json({ message: "Invalid credentials" });
     }
-    // Check if the password is correct
+
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // Generate a token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    // ✅ FIX: Token includes _id
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
-    // Send a success response
+
     res.status(200).json({
       message: "Login successful",
       token,
@@ -133,10 +134,10 @@ const Login = async (req, res) => {
     });
   } catch (error) {
     console.error("Error logging in:", error);
-    if (error.name === " MongoServerError") {
+    if (error.name === "MongoServerError") {
       return res
         .status(503)
-        .json({ message: "Database error , Please try later" });
+        .json({ message: "Database error, please try later" });
     }
     res.status(500).json({ message: "Internal server error" });
   }
@@ -306,9 +307,12 @@ const logout = async (req, res) => {
 
 const getUser = async (req, res) => {
   try {
-    const user = await User.findById({ _id: req.user.id }).select(
+    console.log("req.user:", req.user);
+
+    const user = await User.findById(req.user.id).select(
       "-password -verificationToken -resetPasswordToken -resetPasswordExpires"
     );
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }

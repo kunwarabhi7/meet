@@ -2,7 +2,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useAuth } from "../context/Auth.Context";
 import { useEvent } from "../context/Event.Context";
-
 const Dashboard = () => {
   const { user } = useAuth();
   const { events, isLoading, error, fetchEvents } = useEvent();
@@ -100,6 +99,9 @@ const Dashboard = () => {
                   <p className="text-gray-600">
                     <span className="font-medium">Max Attendees:</span>{" "}
                     {event.maxAttendees}
+                  </p>
+                  <p className="text-gray-600">
+                    <span className="font-medium">Spots Left:</span> 2
                   </p>
                   <p className="text-gray-600">
                     <span className="font-medium">Organizer:</span>{" "}
