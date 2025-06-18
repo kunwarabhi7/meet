@@ -2,6 +2,7 @@ import express from "express";
 import {
   addComment,
   createEvent,
+  deleteComment,
   deleteEvent,
   getAllEvents,
   getEventById,
@@ -19,5 +20,6 @@ router.put("/:eventId", authMiddleware, updateEvent);
 router.delete("/:eventId", authMiddleware, deleteEvent);
 router.post("/:eventId/join", authMiddleware, joinEvent);
 router.post("/:eventId/comment", authMiddleware, addComment);
+router.delete("/:eventId/comment/:commentId", authMiddleware, deleteComment);
 
 export default router;

@@ -332,3 +332,32 @@ export const addComment = async (req, res) => {
     });
   }
 };
+
+export const deleteComment = async (req, res) => {
+  const { eventId, commentId } = req.params;
+  const userId = req.user.id;
+  console.log(eventId, "eventID");
+  console.log(commentId);
+  console.log(userId);
+  try {
+    const event = await Event.findById(eventId);
+    if (!event) return res.status(404).json({ message: "Event not found!" });
+    const comment = event.comments.id(commentId);
+    if (!comment)
+      return res.status(404).json({ message: "Comment not found!" });
+    if (comment.user.toString() !== userId.toString()) {
+      return res
+        .status(403)
+        .json({ message: "Unauthorized to delete this comment" });
+    }
+    event.comments.pull({ _id: commentId });
+    await event.save();
+    return res.status(200).json({ message: "Comment Deleted Successfully🎉" });
+  } catch (error) {
+    console.log("Error deleting Comment  ", error.message);
+    res.status(500).json({
+      message: "Error deleting comment",
+      error: error.message,
+    });
+  }
+};
