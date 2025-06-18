@@ -207,10 +207,9 @@ export const getEventById = async (req, res) => {
         errors: [{ message: "Invalid event ID" }],
       });
     }
-    const event = await Event.findById(req.params.eventId).populate(
-      "organizer",
-      "_id username fullName profilePicture"
-    );
+    const event = await Event.findById(req.params.eventId)
+      .populate("organizer", "_id username fullName profilePicture")
+      .populate("comments.user", "fullName username profilePicture ");
     if (!event) {
       return res.status(404).json({
         errors: [{ message: "Event not found" }],
@@ -292,5 +291,44 @@ export const joinEvent = async (req, res) => {
     return res
       .status(500)
       .json({ error: "Something went wrong, try again later 😔" });
+  }
+};
+
+export const addComment = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const { text } = req.body;
+    const userId = req?.user?.id;
+
+    if (!text) {
+      return res.status(400).json({ error: "Please enter text message" });
+    }
+
+    const event = await Event.findById(eventId)
+      .populate("organizer", "fullName username profilePicture ")
+      .populate("comments.user", "fullName username profilePicture ");
+    if (!event) {
+      return res.status(404).json({ message: "NO Event Found 😔" });
+    }
+
+    event.comments.push({ user: userId, text });
+    await event.save();
+
+    // 👇 Re-fetch the event with populated user in comments
+    const updatedEvent = await Event.findById(eventId).populate(
+      "comments.user",
+      "fullName username profilePicture"
+    );
+
+    res.status(200).json({
+      message: "Comment added Successfully🎉",
+      comments: updatedEvent.comments,
+    });
+  } catch (error) {
+    console.log("Error adding Comment  ", error.message);
+    res.status(500).json({
+      message: "Error Adding comment",
+      error: error.message,
+    });
   }
 };

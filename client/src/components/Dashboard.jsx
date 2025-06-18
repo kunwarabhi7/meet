@@ -12,7 +12,7 @@ const Dashboard = () => {
   }, []);
 
   console.log("Events:", events); // Debug events data
-
+  console.log("Userrrr", user);
   const handleCreateEvent = () => {
     navigate("/create-event");
   };

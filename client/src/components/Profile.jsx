@@ -6,7 +6,7 @@ import imageCompression from "browser-image-compression";
 
 const Profile = () => {
   const { user, updateUser, isLoading } = useAuth();
-  const uservalue = user?.user;
+  const uservalue = user;
   const navigate = useNavigate();
   const {
     register,
@@ -125,7 +125,7 @@ const Profile = () => {
       </div>
     );
   }
-
+  console.log(user, "profileee");
   if (!user || !uservalue) {
     return null; // Avoid rendering until redirect
   }

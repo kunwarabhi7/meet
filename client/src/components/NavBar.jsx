@@ -42,15 +42,12 @@ const Navbar = () => {
               </Link>
               <div className="flex items-center space-x-2">
                 <img
-                  src={
-                    user?.user?.profilePicture ||
-                    "https://via.placeholder.com/40"
-                  }
+                  src={user?.profilePicture || "https://via.placeholder.com/40"}
                   alt="Profile"
                   className="w-10 h-10 rounded-full object-cover border-2 border-amber-400"
                 />
                 <span className="text-white">
-                  Welcome, {user?.user?.fullName || "User"}
+                  Welcome, {user?.fullName || "User"}
                 </span>
               </div>
               <button

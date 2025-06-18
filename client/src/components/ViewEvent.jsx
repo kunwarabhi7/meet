@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { useEvent } from "../context/Event.Context";
 import { useAuth } from "../context/Auth.Context";
 import axios from "axios";
+import AddComment from "./AddComment";
 
 const ViewEvent = () => {
   const { eventId } = useParams();
@@ -132,7 +133,7 @@ const ViewEvent = () => {
     user?.id &&
     event?.organizer?._id &&
     user.id.toString() === event.organizer._id.toString();
-
+  console.log(event?.comments, "eventssss");
   return (
     <div className="min-h-screen bg-teal-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
@@ -245,7 +246,54 @@ const ViewEvent = () => {
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3">
+              {/* ⬇️ Comment Section */}
+              <div className="mt-8">
+                <h4 className="text-lg font-medium text-teal-600 mb-2">
+                  Comments
+                </h4>
+              </div>
+              <div className="space-y-4 bg-gray-50 p-4 rounded-lg shadow-inner">
+                {event?.comments?.length > 0 ? (
+                  event.comments.map((comment, index) => (
+                    <div
+                      key={index}
+                      className="flex gap-3 p-3 bg-white border rounded shadow-sm items-start"
+                    >
+                      <img
+                        src={comment.user?.profilePicture || "/default.jpg"}
+                        alt="Profile"
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                      <div>
+                        <p className="font-semibold text-teal-700">
+                          {comment.user?.fullName || "Unknown"}{" "}
+                          <span className="text-sm text-gray-400">
+                            @{comment.user.fullName || "unknown"}
+                          </span>
+                        </p>
+                        <p className="text-sm text-gray-700 mt-1">
+                          {comment.text}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          {new Date(comment.createdAt).toLocaleString("en-GB")}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500">
+                    No comments yet. Be the first one!
+                  </p>
+                )}
+              </div>
+
+              <AddComment
+                eventId={eventId}
+                user={user}
+                navigate={navigate}
+                onCommentAdded={() => fetchEventById(eventId, true)}
+              />
+              <div className="flex flex-col sm:flex-row justify-end space-y-8 pt-5 sm:space-y-0 sm:space-x-3">
                 {isOrganizer ? (
                   <>
                     <Link
