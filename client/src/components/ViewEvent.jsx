@@ -41,24 +41,6 @@ const ViewEvent = () => {
     loadEvent();
   }, [eventId, fetchEventById, location.state?.fromEdit]);
 
-  useEffect(() => {
-    console.log("User:", JSON.stringify(user, null, 2));
-    console.log("Event:", JSON.stringify(event, null, 2));
-    console.log(
-      "isOrganizer:",
-      user?.id &&
-        event?.organizer?._id &&
-        user.id.toString() === event.organizer._id.toString()
-    );
-    console.log("User ID:", user?._id || "undefined");
-    console.log("Organizer ID:", event?.organizer?._id || "undefined");
-    console.log("isAuthLoading:", isAuthLoading);
-    console.log("Token:", localStorage.getItem("token") || "no token");
-    if (!user && !isAuthLoading && localStorage.getItem("token")) {
-      console.log("User null but token exists, possible auth issue");
-    }
-  }, [user, event, isAuthLoading]);
-
   const handleJoinEvent = async () => {
     const token = localStorage.getItem("token");
     if (!token || !user) {
@@ -68,11 +50,6 @@ const ViewEvent = () => {
     }
 
     try {
-      console.log(
-        "Frontend - Joining event with token:",
-        token.slice(0, 20) + "..."
-      );
-      console.log("Frontend - Event ID:", eventId);
       const response = await axios.post(
         `http://localhost:3000/api/event/${eventId}/join`,
         {},
@@ -81,11 +58,6 @@ const ViewEvent = () => {
       alert(response.data.message);
       await fetchEventById(eventId, true);
     } catch (error) {
-      console.error("Join event error:", {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data,
-      });
       const errorMsg = error.response?.data?.error || "Something went wrong 😔";
       if (error.response?.status === 401) {
         alert("Session expired, please login again 😏");
@@ -106,6 +78,24 @@ const ViewEvent = () => {
       } catch (err) {
         console.error("Failed to delete event:", err);
       }
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    const token = localStorage.getItem("token");
+    try {
+      await axios.delete(
+        `http://localhost:3000/api/event/${eventId}/comment/${commentId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      await fetchEventById(eventId, true);
+    } catch (err) {
+      alert("Failed to delete comment.");
+      console.error("Error deleting comment:", err);
     }
   };
 
@@ -133,7 +123,7 @@ const ViewEvent = () => {
     user?.id &&
     event?.organizer?._id &&
     user.id.toString() === event.organizer._id.toString();
-  console.log(event?.comments, "eventssss");
+
   return (
     <div className="min-h-screen bg-teal-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
@@ -161,27 +151,11 @@ const ViewEvent = () => {
 
         {!isEventLoading &&
           !isAuthLoading &&
-          (!user || !event || event._id !== eventId) &&
-          !error?.length && (
-            <div className="text-center bg-gray-100 p-6 rounded-lg animate-fade-in">
-              <p className="text-gray-600 text-lg">
-                Failed to load user or event data. Please login.
-              </p>
-              <Link
-                to="/login"
-                className="mt-4 inline-block bg-amber-500 text-white px-4 py-2 rounded-md hover:bg-amber-600 transition"
-              >
-                Log In
-              </Link>
-            </div>
-          )}
-
-        {!isEventLoading &&
-          !isAuthLoading &&
           user &&
           event &&
           event._id === eventId && (
             <div className="bg-white p-8 rounded-lg shadow-lg animate-fade-in-up">
+              {/* Organizer Info */}
               <div className="flex flex-col sm:flex-row items-center mb-6">
                 <img
                   src={
@@ -207,6 +181,7 @@ const ViewEvent = () => {
                 </div>
               </div>
 
+              {/* Event Details */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                 <div>
                   <p className="text-gray-600">
@@ -237,6 +212,7 @@ const ViewEvent = () => {
                 </div>
               </div>
 
+              {/* Description */}
               <div className="mb-6">
                 <h4 className="text-lg font-medium text-teal-600 mb-2">
                   Description
@@ -246,18 +222,19 @@ const ViewEvent = () => {
                 </p>
               </div>
 
-              {/* ⬇️ Comment Section */}
+              {/* Comments */}
               <div className="mt-8">
                 <h4 className="text-lg font-medium text-teal-600 mb-2">
                   Comments
                 </h4>
               </div>
+
               <div className="space-y-4 bg-gray-50 p-4 rounded-lg shadow-inner">
                 {event?.comments?.length > 0 ? (
                   event.comments.map((comment, index) => (
                     <div
                       key={index}
-                      className="flex gap-3 p-3 bg-white border rounded shadow-sm items-start"
+                      className="relative flex gap-3 p-3 bg-white border rounded shadow-sm items-start"
                     >
                       <img
                         src={comment.user?.profilePicture || "/default.jpg"}
@@ -278,6 +255,14 @@ const ViewEvent = () => {
                           {new Date(comment.createdAt).toLocaleString("en-GB")}
                         </p>
                       </div>
+                      {comment.user._id === user.id && (
+                        <button
+                          onClick={() => handleDeleteComment(comment._id)}
+                          className="absolute top-2 right-2 bg-red-500 text-xs text-white px-2 py-1 rounded hover:bg-red-800 shadow"
+                        >
+                          Delete
+                        </button>
+                      )}
                     </div>
                   ))
                 ) : (
@@ -287,12 +272,15 @@ const ViewEvent = () => {
                 )}
               </div>
 
+              {/* Add Comment */}
               <AddComment
                 eventId={eventId}
                 user={user}
                 navigate={navigate}
                 onCommentAdded={() => fetchEventById(eventId, true)}
               />
+
+              {/* Buttons */}
               <div className="flex flex-col sm:flex-row justify-end space-y-8 pt-5 sm:space-y-0 sm:space-x-3">
                 {isOrganizer ? (
                   <>
