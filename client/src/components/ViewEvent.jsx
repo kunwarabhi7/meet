@@ -4,6 +4,9 @@ import { useEvent } from "../context/Event.Context";
 import { useAuth } from "../context/Auth.Context";
 import axios from "axios";
 import AddComment from "./AddComment";
+import { toast } from "react-toastify";
+
+import { FaWhatsapp } from "react-icons/fa";
 
 const ViewEvent = () => {
   const { eventId } = useParams();
@@ -118,6 +121,28 @@ const ViewEvent = () => {
       minute: "2-digit",
     });
   };
+
+  const handleShare = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(
+        `http://localhost:3000/api/event/${eventId}/share`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      await navigator.clipboard.writeText(res.data.shareUrl);
+      toast.success("Event link copied to clipboard!");
+    } catch (error) {
+      console.error(err);
+      toast.error("Failed to generate share link 😔");
+    }
+  };
+
+  // const handleWhatsAppShare = () => {
+  //   const message = `Check out this event: ${window.location.href}`;
+  //   const encodedMessage = encodeURIComponent(message);
+  //   const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
+  //   window.open(whatsappUrl, "_blank");
+  // };
 
   const isOrganizer =
     user?.id &&
@@ -331,6 +356,28 @@ const ViewEvent = () => {
                 >
                   Back to Dashboard
                 </Link>
+                <button
+                  className={`px-4 py-2 rounded-md text-white font-medium flex items-center gap-2 ${
+                    isEventLoading || isAuthLoading || !user
+                      ? "bg-amber-400 cursor-not-allowed"
+                      : "bg-amber-500 hover:bg-amber-600"
+                  } transition`}
+                  disabled={isEventLoading || isAuthLoading || !user}
+                  onClick={handleShare}
+                >
+                  <FaWhatsapp
+                    className="text-white bg-[#25D366] p-1 rounded-full"
+                    size={24}
+                  />
+                  Share Event
+                </button>
+                {/* <button
+                  className={`px-4 py-2 rounded-md text-white font-medium flex items-center gap-2 bg-green-500 hover:bg-green-600 transition`}
+                  onClick={handleWhatsAppShare}
+                >
+                  <FaWhatsapp className="text-white text-2xl" />
+                  Share on WhatsApp
+                </button> */}
               </div>
             </div>
           )}

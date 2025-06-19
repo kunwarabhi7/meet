@@ -7,6 +7,7 @@ import {
   getAllEvents,
   getEventById,
   joinEvent,
+  shareEvent,
   updateEvent,
 } from "../controllers/event.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
@@ -21,5 +22,6 @@ router.delete("/:eventId", authMiddleware, deleteEvent);
 router.post("/:eventId/join", authMiddleware, joinEvent);
 router.post("/:eventId/comment", authMiddleware, addComment);
 router.delete("/:eventId/comment/:commentId", authMiddleware, deleteComment);
+router.get("/:eventId/share", authMiddleware, shareEvent);
 
 export default router;

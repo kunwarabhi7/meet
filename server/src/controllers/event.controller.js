@@ -361,3 +361,20 @@ export const deleteComment = async (req, res) => {
     });
   }
 };
+
+export const shareEvent = async (req, res) => {
+  try {
+    const eventId = req.params.eventId;
+    const event = await Event.findById(eventId);
+    if (!event) return res.status(404).json({ message: "No Event Found" });
+    const baseUrl = process.env.CLIENT_URL || "http://localhost:5173";
+    const shareableUrl = `${baseUrl}/event/${eventId}`;
+    return res.status(200).json({ shareUrl: shareableUrl });
+  } catch (error) {
+    console.log("Error Sharing Event  ", error.message);
+    res.status(500).json({
+      message: "Error Sharing Event",
+      error: error.message,
+    });
+  }
+};
