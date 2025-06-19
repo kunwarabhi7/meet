@@ -101,7 +101,8 @@ const Dashboard = () => {
                     {event.maxAttendees}
                   </p>
                   <p className="text-gray-600">
-                    <span className="font-medium">Spots Left:</span> 2
+                    <span className="font-medium">Spots Left:</span>{" "}
+                    {event?.spotLeft}
                   </p>
                   <p className="text-gray-600">
                     <span className="font-medium">Organizer:</span>{" "}

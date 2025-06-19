@@ -243,14 +243,8 @@ export const getEventById = async (req, res) => {
 
 export const joinEvent = async (req, res) => {
   try {
-    const eventId = req.params.eventId;
+    const eventId = req.params?.eventId;
     const userId = req.user?.id;
-
-    console.log("joinEvent - Params and User:", {
-      eventId,
-      userId,
-      user: req.user,
-    });
 
     if (!userId) {
       return res
@@ -263,47 +257,41 @@ export const joinEvent = async (req, res) => {
     }
 
     const event = await Event.findById(eventId);
+
     if (!event) {
       return res.status(404).json({ error: "No event found 😔" });
     }
 
-    // Check if user is the organizer
     if (event.organizer.toString() === userId.toString()) {
-      return res.status(400).json({
-        error: "You are the organizer, you cannot join your own event 😅",
-      });
-    }
-
-    if (!Array.isArray(event.attendees)) {
-      event.attendees = [];
+      return res
+        .status(400)
+        .json({
+          error: "You are the organizer, you cannot join your own event 😅",
+        });
     }
 
     if (event.attendees.includes(userId)) {
       return res
         .status(400)
-        .json({ error: "You are already joined the event 😅" });
+        .json({ error: "You have already joined the event 😅" });
     }
 
-    if (event.attendees.length >= event.maxAttendees) {
+    if (event.spotLeft <= 0) {
       return res.status(400).json({ error: "Event is already full, sorry 😔" });
     }
 
-    const updatedEvent = await Event.findByIdAndUpdate(
-      eventId,
-      { $addToSet: { attendees: userId }, $inc: { maxAttendees: -1 } },
-      { new: true }
-    );
+    event.attendees.push(userId);
+    event.spotLeft -= 1;
+    await event.save();
 
     return res.status(200).json({
       message: "Congratulations, you successfully joined the event 🎉",
-      event: updatedEvent,
+      event,
     });
   } catch (error) {
     console.error("Internal Server Error in joinEvent:", {
       error: error.message,
       stack: error.stack,
-      eventId,
-      userId,
     });
     return res
       .status(500)

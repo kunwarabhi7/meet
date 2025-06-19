@@ -14,6 +14,7 @@ const eventSchema = new mongoose.Schema(
     },
     description: { type: String, required: true },
     maxAttendees: { type: Number, required: true },
+    spotLeft: { type: Number },
     organizer: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -35,5 +36,12 @@ const eventSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+eventSchema.pre("save", function (next) {
+  if (this.isNew) {
+    this.spotLeft = this.maxAttendees;
+  }
+  next();
+});
 
 export const Event = mongoose.model("Event", eventSchema);

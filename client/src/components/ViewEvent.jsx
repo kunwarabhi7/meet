@@ -260,7 +260,7 @@ const ViewEvent = () => {
                     <span className="font-medium text-teal-600">
                       Spots Left:
                     </span>{" "}
-                    {event.maxAttendees - (event.attendees?.length || 0)}
+                    {event.spotLeft}
                   </p>
                 </div>
               </div>
