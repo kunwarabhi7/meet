@@ -94,7 +94,7 @@ const Dashboard = () => {
                   </p>
                   <p className="text-gray-600">
                     <span className="font-medium">Location:</span>{" "}
-                    {event.location}
+                    {event.location?.address || "No location provided"}
                   </p>
                   <p className="text-gray-600">
                     <span className="font-medium">Max Attendees:</span>{" "}

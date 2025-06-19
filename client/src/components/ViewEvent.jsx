@@ -4,6 +4,8 @@ import { useEvent } from "../context/Event.Context";
 import { useAuth } from "../context/Auth.Context";
 import axios from "axios";
 import AddComment from "./AddComment";
+import { FiMapPin } from "react-icons/fi";
+
 import { toast } from "react-toastify";
 
 import { FaWhatsapp } from "react-icons/fa";
@@ -150,16 +152,16 @@ const ViewEvent = () => {
     user.id.toString() === event.organizer._id.toString();
 
   return (
-    <div className="min-h-screen bg-teal-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-bold text-teal-700 mb-6 text-center animate-fade-in-down">
+    <div className="min-h-screen bg-teal-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto">
+        <h2 className="text-3xl font-bold text-teal-700 mb-8 text-center animate-fade-in-down tracking-tight">
           Event Details
         </h2>
 
         {(isEventLoading || isAuthLoading) && (
-          <div className="text-center">
+          <div className="text-center py-12">
             <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-teal-600 border-r-transparent"></div>
-            <p className="text-gray-600 mt-2 animate-pulse">
+            <p className="text-gray-600 mt-3 text-lg animate-pulse">
               {isAuthLoading
                 ? "Loading user data..."
                 : "Loading event details..."}
@@ -168,8 +170,8 @@ const ViewEvent = () => {
         )}
 
         {error && error.length > 0 && (
-          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg animate-fade-in">
-            <p className="font-medium">Error:</p>
+          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-6 animate-fade-in shadow-sm">
+            <p className="font-semibold">Error:</p>
             <p>{error.map((err) => err.message).join(", ")}</p>
           </div>
         )}
@@ -179,9 +181,9 @@ const ViewEvent = () => {
           user &&
           event &&
           event._id === eventId && (
-            <div className="bg-white p-8 rounded-lg shadow-lg animate-fade-in-up">
+            <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg animate-fade-in-up">
               {/* Organizer Info */}
-              <div className="flex flex-col sm:flex-row items-center mb-6">
+              <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
                 <img
                   src={
                     event.organizer?.profilePicture ||
@@ -190,9 +192,9 @@ const ViewEvent = () => {
                   alt={`${
                     event.organizer?.fullName || "Unknown"
                   }'s profile picture`}
-                  className="w-16 h-16 rounded-full object-cover border-2 border-teal-600 mb-4 sm:mb-0 sm:mr-4"
+                  className="w-12 h-12 rounded-full object-cover border-2 border-teal-600"
                 />
-                <div>
+                <div className="text-center sm:text-left">
                   <h3 className="text-2xl font-semibold text-teal-700">
                     {event.name}
                   </h3>
@@ -207,94 +209,121 @@ const ViewEvent = () => {
               </div>
 
               {/* Event Details */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                <div>
-                  <p className="text-gray-600">
-                    <span className="font-medium">Date & Time:</span>{" "}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+                <div className="space-y-2">
+                  <p className="text-gray-700">
+                    <span className="font-medium text-teal-600">
+                      Date & Time:
+                    </span>{" "}
                     {formatDateTime(event.eventDate, event.time)}
                   </p>
-                  <p className="text-gray-600">
-                    <span className="font-medium">Location:</span>{" "}
-                    {event.location}
+                  <p className="text-gray-700 flex items-center gap-2 flex-wrap">
+                    <span className="font-medium text-teal-600 flex items-center gap-1">
+                      <FiMapPin className="text-blue-500" />
+                      Location:
+                    </span>
+                    {event.location?.address || "No location provided"}
+                    {event.location?.address && (
+                      <button
+                        onClick={() => {
+                          const query = event.location?.address || "";
+                          const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                            query
+                          )}`;
+                          window.open(mapUrl, "_blank");
+                        }}
+                        className="ml-2 text-sm bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 transition"
+                      >
+                        View on Map
+                      </button>
+                    )}
                   </p>
-                  <p className="text-gray-600">
-                    <span className="font-medium">Max Attendees:</span>{" "}
+                  <p className="text-gray-700">
+                    <span className="font-medium text-teal-600">
+                      Max Attendees:
+                    </span>{" "}
                     {event.maxAttendees}
                   </p>
                 </div>
-                <div>
-                  <p className="text-gray-600">
-                    <span className="font-medium">Created:</span>{" "}
+                <div className="space-y-2">
+                  <p className="text-gray-700">
+                    <span className="font-medium text-teal-600">Created:</span>{" "}
                     {event.createdAt ? formatTimestamp(event.createdAt) : "N/A"}
                   </p>
-                  <p className="text-gray-600">
-                    <span className="font-medium">Last Updated:</span>{" "}
+                  <p className="text-gray-700">
+                    <span className="font-medium text-teal-600">
+                      Last Updated:
+                    </span>{" "}
                     {event.updatedAt ? formatTimestamp(event.updatedAt) : "N/A"}
                   </p>
-                  <p className="text-gray-600">
-                    <span className="font-medium">Spots Left:</span> 2
+                  <p className="text-gray-700">
+                    <span className="font-medium text-teal-600">
+                      Spots Left:
+                    </span>{" "}
+                    {event.maxAttendees - (event.attendees?.length || 0)}
                   </p>
                 </div>
               </div>
 
               {/* Description */}
               <div className="mb-6">
-                <h4 className="text-lg font-medium text-teal-600 mb-2">
+                <h4 className="text-lg font-semibold text-teal-600 mb-2">
                   Description
                 </h4>
-                <p className="text-gray-600 bg-gray-100 p-4 rounded-md">
+                <p className="text-gray-700 bg-gray-100 p-4 rounded-lg">
                   {event.description}
                 </p>
               </div>
 
               {/* Comments */}
-              <div className="mt-8">
-                <h4 className="text-lg font-medium text-teal-600 mb-2">
+              <div className="mb-6">
+                <h4 className="text-lg font-semibold text-teal-600 mb-3">
                   Comments
                 </h4>
-              </div>
-
-              <div className="space-y-4 bg-gray-50 p-4 rounded-lg shadow-inner">
-                {event?.comments?.length > 0 ? (
-                  event.comments.map((comment, index) => (
-                    <div
-                      key={index}
-                      className="relative flex gap-3 p-3 bg-white border rounded shadow-sm items-start"
-                    >
-                      <img
-                        src={comment.user?.profilePicture || "/default.jpg"}
-                        alt="Profile"
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
-                      <div>
-                        <p className="font-semibold text-teal-700">
-                          {comment.user?.fullName || "Unknown"}{" "}
-                          <span className="text-sm text-gray-400">
-                            @{comment.user.fullName || "unknown"}
-                          </span>
-                        </p>
-                        <p className="text-sm text-gray-700 mt-1">
-                          {comment.text}
-                        </p>
-                        <p className="text-xs text-gray-400 mt-1">
-                          {new Date(comment.createdAt).toLocaleString("en-GB")}
-                        </p>
+                <div className="space-y-3 bg-gray-50 p-4 rounded-lg shadow-inner">
+                  {event?.comments?.length > 0 ? (
+                    event.comments.map((comment, index) => (
+                      <div
+                        key={index}
+                        className="flex gap-3 p-3 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition relative"
+                      >
+                        <img
+                          src={comment.user?.profilePicture || "/default.jpg"}
+                          alt="Profile"
+                          className="w-10 h-10 rounded-full object-cover border border-gray-300"
+                        />
+                        <div className="flex-1">
+                          <p className="font-semibold text-teal-700 text-sm">
+                            {comment.user?.fullName || "Unknown"}{" "}
+                            <span className="text-xs text-gray-400">
+                              @{comment.user?.username || "unknown"}
+                            </span>
+                          </p>
+                          <p className="text-gray-700 text-sm mt-1">
+                            {comment.text}
+                          </p>
+                          <p className="text-xs text-gray-400 mt-1">
+                            {new Date(comment.createdAt).toLocaleString(
+                              "en-GB"
+                            )}
+                          </p>
+                        </div>
+                        {comment.user?._id === user?._id && (
+                          <button
+                            onClick={() => handleDeleteComment(comment._id)}
+                            className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded hover:bg-red-600 transition"
+                          >
+                            Delete
+                          </button>
+                        )}
                       </div>
-                      {comment.user._id === user.id && (
-                        <button
-                          onClick={() => handleDeleteComment(comment._id)}
-                          className="absolute top-2 right-2 bg-red-500 text-xs text-white px-2 py-1 rounded hover:bg-red-800 shadow"
-                        >
-                          Delete
-                        </button>
-                      )}
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-gray-500">
-                    No comments yet. Be the first one!
-                  </p>
-                )}
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-center py-4">
+                      No comments yet. Be the first one!
+                    </p>
+                  )}
+                </div>
               </div>
 
               {/* Add Comment */}
@@ -306,12 +335,12 @@ const ViewEvent = () => {
               />
 
               {/* Buttons */}
-              <div className="flex flex-col sm:flex-row justify-end space-y-8 pt-5 sm:space-y-0 sm:space-x-3">
+              <div className="flex flex-col sm:flex-row justify-end gap-3 mt-8">
                 {isOrganizer ? (
                   <>
                     <Link
                       to={`/event/${eventId}/edit`}
-                      className={`px-4 py-2 rounded-md text-white font-medium ${
+                      className={`px-4 py-2 rounded-md text-white font-medium text-center ${
                         isEventLoading || isAuthLoading
                           ? "bg-teal-400 cursor-not-allowed"
                           : "bg-teal-600 hover:bg-teal-700"
@@ -322,7 +351,7 @@ const ViewEvent = () => {
                     </Link>
                     <button
                       onClick={handleDelete}
-                      className={`px-4 py-2 rounded-md text-white font-medium ${
+                      className={`px-4 py-2 rounded-md text-white font-medium text-center ${
                         isEventLoading || isAuthLoading
                           ? "bg-red-400 cursor-not-allowed"
                           : "bg-red-600 hover:bg-red-700"
@@ -334,7 +363,7 @@ const ViewEvent = () => {
                   </>
                 ) : (
                   <button
-                    className={`px-4 py-2 rounded-md text-white font-medium ${
+                    className={`px-4 py-2 rounded-md text-white font-medium text-center ${
                       isEventLoading || isAuthLoading || !user
                         ? "bg-amber-400 cursor-not-allowed"
                         : "bg-amber-500 hover:bg-amber-600"
@@ -347,7 +376,7 @@ const ViewEvent = () => {
                 )}
                 <Link
                   to="/dashboard"
-                  className={`px-4 py-2 rounded-md text-white font-medium ${
+                  className={`px-4 py-2 rounded-md text-white font-medium text-center ${
                     isEventLoading || isAuthLoading
                       ? "bg-amber-400 cursor-not-allowed"
                       : "bg-amber-500 hover:bg-amber-600"
@@ -357,27 +386,17 @@ const ViewEvent = () => {
                   Back to Dashboard
                 </Link>
                 <button
-                  className={`px-4 py-2 rounded-md text-white font-medium flex items-center gap-2 ${
+                  className={`px-4 py-2 rounded-md text-white font-medium flex items-center justify-center gap-2 text-center ${
                     isEventLoading || isAuthLoading || !user
                       ? "bg-amber-400 cursor-not-allowed"
-                      : "bg-amber-500 hover:bg-amber-600"
+                      : "bg-green-500 hover:bg-green-600"
                   } transition`}
                   disabled={isEventLoading || isAuthLoading || !user}
                   onClick={handleShare}
                 >
-                  <FaWhatsapp
-                    className="text-white bg-[#25D366] p-1 rounded-full"
-                    size={24}
-                  />
+                  <FaWhatsapp className="text-white" size={20} />
                   Share Event
                 </button>
-                {/* <button
-                  className={`px-4 py-2 rounded-md text-white font-medium flex items-center gap-2 bg-green-500 hover:bg-green-600 transition`}
-                  onClick={handleWhatsAppShare}
-                >
-                  <FaWhatsapp className="text-white text-2xl" />
-                  Share on WhatsApp
-                </button> */}
               </div>
             </div>
           )}

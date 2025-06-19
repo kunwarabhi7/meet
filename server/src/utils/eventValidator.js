@@ -70,9 +70,15 @@ const validateCreateEvent = ({
     }
   }
 
-  if (!location || validator.isEmpty(location.trim())) {
+  if (
+    !location ||
+    typeof location.address !== "string" ||
+    validator.isEmpty(location.address.trim())
+  ) {
     errors.push({ field: "location", message: "Event location is required" });
-  } else if (!validator.isLength(location.trim(), { min: 3, max: 200 })) {
+  } else if (
+    !validator.isLength(location.address.trim(), { min: 3, max: 200 })
+  ) {
     errors.push({
       field: "location",
       message: "Location must be between 3 and 200 characters",

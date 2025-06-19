@@ -5,7 +5,13 @@ const eventSchema = new mongoose.Schema(
     name: { type: String, required: true },
     eventDate: { type: Date, required: true },
     time: { type: String, required: true },
-    location: { type: String, required: true },
+    location: {
+      address: { type: String, required: true },
+      coordinates: {
+        lat: { type: Number, required: true },
+        lng: { type: Number, required: true },
+      },
+    },
     description: { type: String, required: true },
     maxAttendees: { type: Number, required: true },
     organizer: {

@@ -84,12 +84,29 @@ export const createEvent = async (req, res) => {
       });
     }
 
+    // location
+    if (
+      !location?.address ||
+      typeof location?.coordinates?.lat !== "number" ||
+      typeof location?.coordinates?.lng !== "number"
+    ) {
+      return res.status(400).json({
+        message: "Location must include address and coordinates",
+      });
+    }
+
     // Create event
     const event = new Event({
       name,
       eventDate,
       time,
-      location,
+      location: {
+        address: location.address,
+        coordinates: {
+          lat: location.coordinates.lat,
+          lng: location.coordinates.lng,
+        },
+      },
       description,
       maxAttendees,
       organizer: userId,
@@ -114,7 +131,7 @@ export const createEvent = async (req, res) => {
       name: event.name,
       date: event.eventDate.toLocaleDateString(),
       time: event.time,
-      location: event.location,
+      location: event.location.address,
       description: event.description || "No description provided",
       maxAttendees: event.maxAttendees || "No limit",
       eventId: event._id,

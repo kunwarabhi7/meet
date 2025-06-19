@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useEvent } from "../context/Event.Context";
+import LocationPicker from "./LocationPicker";
 
 const CreateEvent = () => {
   const [successMessage, setSuccessMessage] = useState(null);
   const { isLoading, error, createEvent } = useEvent();
-
+  const [location, setLocation] = useState(null);
   const {
     register,
     handleSubmit,
@@ -24,9 +25,10 @@ const CreateEvent = () => {
 
   const onSubmit = async (data) => {
     try {
-      // Log date for debugging
       console.log("Submitted date:", data.date);
-
+      if (!location) {
+        throw new Error("Please pick a location on the map 🗺️");
+      }
       // Validate date
       if (!data.date) {
         throw new Error("Date is required");
@@ -36,14 +38,17 @@ const CreateEvent = () => {
         throw new Error("Invalid date selected");
       }
       // Send date as YYYY-MM-DD
-      const formattedDate = data.date; // Already in YYYY-MM-DD from type="date"
+      const formattedDate = data.date;
       console.log("Formatted date:", formattedDate);
 
       await createEvent(
         data.name,
-        formattedDate, // Send as YYYY-MM-DD
+        formattedDate,
         data.time,
-        data.location,
+        {
+          address: data.location,
+          coordinates: location,
+        },
         data.description,
         data.maxAttendees
       );
@@ -229,6 +234,11 @@ const CreateEvent = () => {
             )}
           </div>
 
+          {/* Location Picker */}
+          <label className="font-medium block mt-4 mb-1">
+            Pick Event Location:
+          </label>
+          <LocationPicker setLocation={setLocation} />
           {/* Submit Button */}
           <button
             type="submit"
