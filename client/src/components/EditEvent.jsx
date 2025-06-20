@@ -16,23 +16,27 @@ const EditEvent = () => {
     name: "",
     eventDate: "",
     time: "",
-    location: "",
+    location: {
+      address: "",
+      coordinates: { lat: null, lng: null },
+    },
+
     description: "",
     maxAttendees: "",
   });
   const [originalData, setOriginalData] = useState(null);
   const [updateError, setUpdateError] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const hasLoadedRef = useRef(false); // Track load status
+  const hasLoadedRef = useRef(false);
 
   useEffect(() => {
     if (hasLoadedRef.current && event?._id === eventId) {
-      return; // Skip if already loaded
+      return;
     }
-
     const loadEvent = async () => {
       try {
         await fetchEventById(eventId);
+
         hasLoadedRef.current = true;
       } catch (err) {
         console.error("Error loading event:", err);
@@ -52,10 +56,12 @@ const EditEvent = () => {
           ? new Date(event.eventDate).toISOString().split("T")[0]
           : "",
         time: event.time || "",
-        location: event.location || "",
+        location: event.location,
+
         description: event.description || "",
         maxAttendees: event.maxAttendees ? event.maxAttendees.toString() : "",
       };
+
       setFormData(eventData);
       setOriginalData(eventData);
       console.log("Loaded event data from context:", eventData);
@@ -174,8 +180,8 @@ const EditEvent = () => {
                   <input
                     type="text"
                     name="location"
-                    value={formData.location}
-                    onChange={handleChange}
+                    value={formData.location.address}
+                    // onChange={handleChange}
                     className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-600"
                     placeholder="Enter location"
                   />

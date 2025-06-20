@@ -38,7 +38,7 @@ const validateCreateEvent = ({
   if (!time || validator.isEmpty(time.trim())) {
     errors.push({ field: "time", message: "Event time is required" });
   } else if (
-    !validator.matches(time, /^(1[0-2]|0?[1-9]):[0-5][0-9]\s?(AM|PM)$/i)
+    !validator.matches(time, /^(0?[1-9]|1[0-2]):[0-5][0-9]\s?(AM|PM)$/i)
   ) {
     errors.push({
       field: "time",

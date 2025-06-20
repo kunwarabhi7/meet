@@ -8,8 +8,8 @@ const eventSchema = new mongoose.Schema(
     location: {
       address: { type: String, required: true },
       coordinates: {
-        lat: { type: Number, required: true },
-        lng: { type: Number, required: true },
+        lat: { type: Number },
+        lng: { type: Number },
       },
     },
     description: { type: String, required: true },

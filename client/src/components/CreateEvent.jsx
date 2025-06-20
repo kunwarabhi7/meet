@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { useEvent } from "../context/Event.Context";
 import LocationPicker from "./LocationPicker";
+import TimePicker from "react-time-picker";
+import "react-time-picker/dist/TimePicker.css";
 
 const CreateEvent = () => {
   const [successMessage, setSuccessMessage] = useState(null);
@@ -12,6 +14,7 @@ const CreateEvent = () => {
     handleSubmit,
     formState: { errors },
     reset,
+    control,
   } = useForm({
     defaultValues: {
       name: "",
@@ -39,12 +42,20 @@ const CreateEvent = () => {
       }
       // Send date as YYYY-MM-DD
       const formattedDate = data.date;
-      console.log("Formatted date:", formattedDate);
+      const formattedTime = data.time
+        ? new Date(`1970-01-01T${data.time}`).toLocaleTimeString("en-US", {
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+          })
+        : "";
 
+      console.log("Formatted date:", formattedDate);
+      console.log("Formatted Time", formattedTime);
       await createEvent(
         data.name,
         formattedDate,
-        data.time,
+        formattedTime,
         {
           address: data.location,
           coordinates: location,
@@ -132,17 +143,19 @@ const CreateEvent = () => {
             <label className="block text-gray-700 font-medium mb-1">
               Event Time (e.g., 6:30 PM)
             </label>
-            <input
-              type="text"
-              {...register("time", {
-                required: "Event time is required",
-                pattern: {
-                  value: /^(1[0-2]|0?[1-9]):[0-5][0-9] (AM|PM)$/i,
-                  message: "Time must be in 12-hour format (e.g., 6:30 PM)",
-                },
-              })}
-              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-              placeholder="e.g., 6:30 PM"
+            <Controller
+              name="time"
+              control={control}
+              rules={{ required: "Event time is required" }}
+              render={({ field }) => (
+                <TimePicker
+                  {...field}
+                  onChange={field.onChange}
+                  value={field.value}
+                  disableClock
+                  className="w-full border border-gray-300 rounded-md p-2"
+                />
+              )}
             />
             {errors.time && (
               <p className="text-red-500 text-sm mt-1">{errors.time.message}</p>
@@ -178,6 +191,12 @@ const CreateEvent = () => {
               <p className="text-red-500 text-sm mt-1">{apiErrors.location}</p>
             )}
           </div>
+
+          {/* Location Picker */}
+          <label className="font-medium block mt-4 mb-1">
+            Pick Event Location:
+          </label>
+          <LocationPicker setLocation={setLocation} />
 
           {/* Description */}
           <div>
@@ -234,11 +253,6 @@ const CreateEvent = () => {
             )}
           </div>
 
-          {/* Location Picker */}
-          <label className="font-medium block mt-4 mb-1">
-            Pick Event Location:
-          </label>
-          <LocationPicker setLocation={setLocation} />
           {/* Submit Button */}
           <button
             type="submit"
