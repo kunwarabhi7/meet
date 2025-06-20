@@ -23,7 +23,7 @@ app.use("/api/event", eventRoute);
 
 // Root route
 app.get("/", (req, res) => {
-  res.send("API is working fine!");
+  res.send("API is working fine yo!");
 });
 //start server only after successful connection to the database
 const startServer = async () => {
