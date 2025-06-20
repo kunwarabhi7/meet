@@ -263,11 +263,9 @@ export const joinEvent = async (req, res) => {
     }
 
     if (event.organizer.toString() === userId.toString()) {
-      return res
-        .status(400)
-        .json({
-          error: "You are the organizer, you cannot join your own event 😅",
-        });
+      return res.status(400).json({
+        error: "You are the organizer, you cannot join your own event 😅",
+      });
     }
 
     if (event.attendees.includes(userId)) {
@@ -375,6 +373,31 @@ export const shareEvent = async (req, res) => {
     const baseUrl = process.env.CLIENT_URL || "http://localhost:5173";
     const shareableUrl = `${baseUrl}/event/${eventId}`;
     return res.status(200).json({ shareUrl: shareableUrl });
+  } catch (error) {
+    console.log("Error Sharing Event  ", error.message);
+    res.status(500).json({
+      message: "Error Sharing Event",
+      error: error.message,
+    });
+  }
+};
+
+export const getGuestList = async (req, res) => {
+  try {
+    const eventId = req.params.eventId;
+    if (!mongoose.Types.ObjectId.isValid(eventId)) {
+      return res.status(400).json({ message: "Invalid event Id" });
+    }
+    const event = await Event.findById(eventId).populate(
+      "attendees",
+      "username fullName profilePicture"
+    );
+    if (!event) {
+      return res.status(404).json({ message: "Event Not Found" });
+    }
+    return res.status(200).json({
+      guests: event.attendees,
+    });
   } catch (error) {
     console.log("Error Sharing Event  ", error.message);
     res.status(500).json({

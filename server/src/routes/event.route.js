@@ -6,6 +6,7 @@ import {
   deleteEvent,
   getAllEvents,
   getEventById,
+  getGuestList,
   joinEvent,
   shareEvent,
   updateEvent,
@@ -23,5 +24,6 @@ router.post("/:eventId/join", authMiddleware, joinEvent);
 router.post("/:eventId/comment", authMiddleware, addComment);
 router.delete("/:eventId/comment/:commentId", authMiddleware, deleteComment);
 router.get("/:eventId/share", authMiddleware, shareEvent);
+router.get("/:eventId/guest", authMiddleware, getGuestList);
 
 export default router;

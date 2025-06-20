@@ -17,6 +17,8 @@ const ViewEvent = () => {
     deleteEvent,
     event,
     isLoading: isEventLoading,
+    guestList,
+    guests,
     error,
   } = useEvent();
   const { user, isLoading: isAuthLoading } = useAuth();
@@ -38,6 +40,7 @@ const ViewEvent = () => {
         const forceRefresh = location.state?.fromEdit || false;
         await fetchEventById(eventId, forceRefresh);
         hasFetchedRef.current = true;
+        await guestList(eventId);
       } catch (err) {
         console.error("Failed to fetch event:", err);
       }
@@ -145,7 +148,7 @@ const ViewEvent = () => {
   //   const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
   //   window.open(whatsappUrl, "_blank");
   // };
-
+  console.log(guests, "guestss");
   const isOrganizer =
     user?.id &&
     event?.organizer?._id &&
@@ -273,6 +276,41 @@ const ViewEvent = () => {
                 <p className="text-gray-700 bg-gray-100 p-4 rounded-lg">
                   {event.description}
                 </p>
+              </div>
+
+              {/* Guest List */}
+              <div className="mb-6 ">
+                <h4 className="text-lg font-semibold text-teal-600 mb-3">
+                  Guest List
+                </h4>
+                {guests.length > 0 ? (
+                  <div className="grid sm:grid-cols-2 gap-4 bg-gray-50 p-2 rounded-lg shadow-inner">
+                    {guests.map((guest) => (
+                      <div
+                        key={guest._id}
+                        className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg shadow-sm"
+                      >
+                        <img
+                          src={guest.profilePicture || "/default.jpg"}
+                          alt={guest.fullName}
+                          className="w-10 h-10 rounded-full object-cover border"
+                        />
+                        <div>
+                          <p className="text-teal-700 font-semibold text-sm">
+                            {guest?.fullName}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            @{guest.username}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500">
+                    No one has joined this event yet.
+                  </p>
+                )}
               </div>
 
               {/* Comments */}

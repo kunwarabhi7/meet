@@ -18,6 +18,7 @@ export const EventProvider = ({ children }) => {
   const [event, setEvent] = useState(null);
   const eventCacheRef = useRef(new Map());
   const { token } = useAuth();
+  const [guests, setGuests] = useState([]);
 
   useEffect(() => {
     fetchEvents();
@@ -273,6 +274,38 @@ export const EventProvider = ({ children }) => {
     [token]
   );
 
+  const guestList = useCallback(
+    async (eventId) => {
+      if (!eventId || !/^[0-9a-fA-F]{24}$/.test(eventId)) {
+        const errorMessages = [{ message: "Invalid event ID for guest list" }];
+        setError(errorMessages);
+        throw errorMessages;
+      }
+      console.log(eventId, "abhishek");
+      setIsLoading(true);
+      setError([]);
+      try {
+        const res = await axios.get(
+          `http://localhost:3000/api/event/${eventId}/guest`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        console.log("Guest List Response:", res.data); // 👈 yeh dekho
+
+        setGuests(res.data.guests || []);
+        return res.data.guests || [];
+      } catch (err) {
+        const errorMessages = err.response?.data?.errors || [
+          { message: "Error fetching guest list" },
+        ];
+        setError(errorMessages);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [token]
+  );
+
   return (
     <EventContext.Provider
       value={{
@@ -285,6 +318,8 @@ export const EventProvider = ({ children }) => {
         fetchEventById,
         updateEvent,
         deleteEvent,
+        guestList,
+        guests,
       }}
     >
       {children}
