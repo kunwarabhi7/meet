@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axiosInstance from "../utils/axionInstance";
 
 const AddComment = ({ eventId, onCommentAdded, user }) => {
   const [commentText, setCommentText] = useState("");
@@ -25,7 +26,7 @@ const AddComment = ({ eventId, onCommentAdded, user }) => {
       const token = localStorage.getItem("token");
 
       await axios.post(
-        `http://localhost:3000/api/event/${eventId}/comment`,
+        `${axiosInstance}/event/${eventId}/comment`,
         {
           text: commentText,
         },

@@ -9,6 +9,7 @@ import { FiMapPin } from "react-icons/fi";
 import { toast } from "react-toastify";
 
 import { FaWhatsapp } from "react-icons/fa";
+import axiosInstance from "../utils/axionInstance";
 
 const ViewEvent = () => {
   const { eventId } = useParams();
@@ -59,7 +60,7 @@ const ViewEvent = () => {
 
     try {
       const response = await axios.post(
-        `http://localhost:3000/api/event/${eventId}/join`,
+        `${axiosInstance}/event/${eventId}/join`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -93,7 +94,7 @@ const ViewEvent = () => {
     const token = localStorage.getItem("token");
     try {
       await axios.delete(
-        `http://localhost:3000/api/event/${eventId}/comment/${commentId}`,
+        `${axiosInstance}/event/${eventId}/comment/${commentId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -130,10 +131,9 @@ const ViewEvent = () => {
   const handleShare = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get(
-        `http://localhost:3000/api/event/${eventId}/share`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const res = await axios.get(`${axiosInstance}/event/${eventId}/share`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       await navigator.clipboard.writeText(res.data.shareUrl);
       toast.success("Event link copied to clipboard!");
     } catch (error) {

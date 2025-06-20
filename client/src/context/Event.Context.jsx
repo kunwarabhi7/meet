@@ -8,6 +8,7 @@ import {
 } from "react";
 import { useAuth } from "./Auth.Context.jsx";
 import axios from "axios";
+import axiosInstance from "../utils/axionInstance.jsx";
 
 const EventContext = createContext();
 
@@ -33,7 +34,7 @@ export const EventProvider = ({ children }) => {
     setIsLoading(true);
     setError([]);
     try {
-      const response = await axios.get("http://localhost:3000/api/event", {
+      const response = await axios.get(`${axiosInstance}/event`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const enrichedEvents = response.data.map((event) => ({
@@ -72,7 +73,7 @@ export const EventProvider = ({ children }) => {
       setError([]);
       try {
         const response = await axios.post(
-          "http://localhost:3000/api/event",
+          "${axiosInstance}/event",
           {
             name,
             date,
@@ -142,15 +143,12 @@ export const EventProvider = ({ children }) => {
       setIsLoading(true);
       setError([]);
       try {
-        const response = await axios.get(
-          `http://localhost:3000/api/event/${eventId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Cache-Control": "no-cache",
-            },
-          }
-        );
+        const response = await axios.get(`${axiosInstance}/event/${eventId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Cache-Control": "no-cache",
+          },
+        });
         const eventData = response.data;
         const enrichedEvent = {
           ...eventData,
@@ -197,7 +195,7 @@ export const EventProvider = ({ children }) => {
       setError([]);
       try {
         const response = await axios.put(
-          `http://localhost:3000/api/event/${eventId}`,
+          `${axiosInstance}/event/${eventId}`,
           updateFields,
           {
             headers: { Authorization: `Bearer ${token}` },
@@ -251,7 +249,7 @@ export const EventProvider = ({ children }) => {
       setIsLoading(true);
       setError([]);
       try {
-        await axios.delete(`http://localhost:3000/api/event/${eventId}`, {
+        await axios.delete(`${axiosInstance}/event/${eventId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         eventCacheRef.current.delete(eventId);
@@ -285,10 +283,9 @@ export const EventProvider = ({ children }) => {
       setIsLoading(true);
       setError([]);
       try {
-        const res = await axios.get(
-          `http://localhost:3000/api/event/${eventId}/guest`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        const res = await axios.get(`${axiosInstance}/event/${eventId}/guest`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         console.log("Guest List Response:", res.data); // 👈 yeh dekho
 
         setGuests(res.data.guests || []);
