@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
+import axiosInstance from "../utils/axionInstance";
 
 export const AuthContext = createContext();
 
@@ -13,12 +14,9 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         try {
           console.log("Fetching user with token:", token.slice(0, 20) + "...");
-          const response = await axios.get(
-            "http://localhost:3000/api/user/profile",
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          );
+          const response = await axios.get("${axiosInstance}/user/profile", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
           console.log("Fetched User:", JSON.stringify(response.data, null, 2));
           console.log("Response shape on /profile:", response.data);
 
@@ -43,18 +41,17 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   const Login = async (usermail, password) => {
+    console.log(axiosInstance, "axiosss");
     try {
       console.log("Logging in with:", { usermail });
-      const response = await axios.post(
-        "http://localhost:3000/api/user/login",
-        {
-          usermail,
-          password,
-        }
-      );
+      const response = await axios.post("${axiosInstance}/user/login", {
+        usermail,
+        password,
+      });
       const { token, user } = response.data;
       console.log("Login - User:", JSON.stringify(user, null, 2));
       console.log("Login - Token:", token.slice(0, 20) + "...");
+
       setUser(user);
       setToken(token);
       localStorage.setItem("token", token);
@@ -78,15 +75,12 @@ export const AuthProvider = ({ children }) => {
 
   const SignUp = async (username, password, fullName, email) => {
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/user/signup",
-        {
-          username,
-          password,
-          fullName,
-          email,
-        }
-      );
+      const response = await axios.post("${axiosInstance}/user/signup", {
+        username,
+        password,
+        fullName,
+        email,
+      });
       const { token, user } = response.data;
       console.log("SignUp - User:", JSON.stringify(user, null, 2)); // Debug
       setUser(user);
@@ -109,7 +103,7 @@ export const AuthProvider = ({ children }) => {
   const Logout = async () => {
     try {
       await axios.post(
-        "http://localhost:3000/api/user/logout",
+        "${axiosInstance}/user/logout",
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -129,7 +123,7 @@ export const AuthProvider = ({ children }) => {
     try {
       console.log("Sending Payload:", userData);
       const response = await axios.put(
-        "http://localhost:3000/api/user/profile",
+        "${axiosInstance}/user/profile",
         userData,
         {
           headers: { Authorization: `Bearer ${token}` },
