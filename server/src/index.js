@@ -12,7 +12,7 @@ const app = express();
 // Middleware
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://meet-one-beta.vercel.app/",
+  "https://meet-one-beta.vercel.app",
 ];
 
 app.use(
