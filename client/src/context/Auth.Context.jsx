@@ -14,7 +14,7 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         try {
           console.log("Fetching user with token:", token.slice(0, 20) + "...");
-          const response = await axios.get("${axiosInstance}/user/profile", {
+          const response = await axiosInstance.get("/user/profile", {
             headers: { Authorization: `Bearer ${token}` },
           });
           console.log("Fetched User:", JSON.stringify(response.data, null, 2));
@@ -75,7 +75,7 @@ export const AuthProvider = ({ children }) => {
 
   const SignUp = async (username, password, fullName, email) => {
     try {
-      const response = await axios.post("${axiosInstance}/user/signup", {
+      const response = await axiosInstance.post("/user/signup", {
         username,
         password,
         fullName,
@@ -102,8 +102,8 @@ export const AuthProvider = ({ children }) => {
 
   const Logout = async () => {
     try {
-      await axios.post(
-        "${axiosInstance}/user/logout",
+      await axiosInstance(
+        "/user/logout",
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -122,13 +122,9 @@ export const AuthProvider = ({ children }) => {
   const updateUser = async (userData) => {
     try {
       console.log("Sending Payload:", userData);
-      const response = await axios.put(
-        "${axiosInstance}/user/profile",
-        userData,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await axiosInstance.put("/user/profile", userData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       console.log("Backend Response:", JSON.stringify(response.data, null, 2));
       setUser(response.data.user);
       setIsLoading(false);

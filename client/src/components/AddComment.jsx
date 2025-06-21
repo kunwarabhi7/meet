@@ -25,8 +25,8 @@ const AddComment = ({ eventId, onCommentAdded, user }) => {
       setErrorMsg("");
       const token = localStorage.getItem("token");
 
-      await axios.post(
-        `${axiosInstance}/event/${eventId}/comment`,
+      await axiosInstance.post(
+        `/event/${eventId}/comment`,
         {
           text: commentText,
         },

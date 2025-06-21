@@ -59,8 +59,8 @@ const ViewEvent = () => {
     }
 
     try {
-      const response = await axios.post(
-        `${axiosInstance}/event/${eventId}/join`,
+      const response = await axiosInstance.post(
+        `/event/${eventId}/join`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -93,14 +93,11 @@ const ViewEvent = () => {
   const handleDeleteComment = async (commentId) => {
     const token = localStorage.getItem("token");
     try {
-      await axios.delete(
-        `${axiosInstance}/event/${eventId}/comment/${commentId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      await axiosInstance.delete(`/event/${eventId}/comment/${commentId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       await fetchEventById(eventId, true);
     } catch (err) {
       alert("Failed to delete comment.");
@@ -131,7 +128,7 @@ const ViewEvent = () => {
   const handleShare = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get(`${axiosInstance}/event/${eventId}/share`, {
+      const res = await axiosInstance.get(`/event/${eventId}/share`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       await navigator.clipboard.writeText(res.data.shareUrl);
