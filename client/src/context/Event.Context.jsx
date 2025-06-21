@@ -34,7 +34,7 @@ export const EventProvider = ({ children }) => {
     setIsLoading(true);
     setError([]);
     try {
-      const response = await axios.get(`${axiosInstance}/event`, {
+      const response = await axiosInstance.get(`/event`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const enrichedEvents = response.data.map((event) => ({
@@ -72,8 +72,8 @@ export const EventProvider = ({ children }) => {
       setIsLoading(true);
       setError([]);
       try {
-        const response = await axios.post(
-          "${axiosInstance}/event",
+        const response = await axiosInstance.post(
+          "/event",
           {
             name,
             date,
@@ -143,7 +143,7 @@ export const EventProvider = ({ children }) => {
       setIsLoading(true);
       setError([]);
       try {
-        const response = await axios.get(`${axiosInstance}/event/${eventId}`, {
+        const response = await axiosInstance.get(`/event/${eventId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Cache-Control": "no-cache",
@@ -194,8 +194,8 @@ export const EventProvider = ({ children }) => {
       setIsLoading(true);
       setError([]);
       try {
-        const response = await axios.put(
-          `${axiosInstance}/event/${eventId}`,
+        const response = await axiosInstance.put(
+          `/event/${eventId}`,
           updateFields,
           {
             headers: { Authorization: `Bearer ${token}` },
@@ -249,7 +249,7 @@ export const EventProvider = ({ children }) => {
       setIsLoading(true);
       setError([]);
       try {
-        await axios.delete(`${axiosInstance}/event/${eventId}`, {
+        await axiosInstance.delete(`/event/${eventId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         eventCacheRef.current.delete(eventId);
@@ -283,7 +283,7 @@ export const EventProvider = ({ children }) => {
       setIsLoading(true);
       setError([]);
       try {
-        const res = await axios.get(`${axiosInstance}/event/${eventId}/guest`, {
+        const res = await axiosInstance.get(`/event/${eventId}/guest`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         console.log("Guest List Response:", res.data); // 👈 yeh dekho

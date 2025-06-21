@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }) => {
     console.log(axiosInstance, "axiosss");
     try {
       console.log("Logging in with:", { usermail });
-      const response = await axios.post("${axiosInstance}/user/login", {
+      const response = await axiosInstance.post("/user/login", {
         usermail,
         password,
       });
