@@ -9,6 +9,7 @@ import {
   SignUp,
   updateProfile,
   verifyEmail,
+  verifyResetToken,
 } from "../controllers/user.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 
@@ -29,6 +30,7 @@ router.get("/profile", authMiddleware, getUser);
 router.get("/verify-email/:token", verifyEmailLimiter, verifyEmail);
 router.post("/forgot-password", forgotPasswordLimiter, forgotPassword);
 router.post("/reset-password/:token", resetPasswordLimiter, resetPassword);
+router.get("/reset-password/:token", verifyResetToken);
 
 router.post(
   "/resend-verification-email",

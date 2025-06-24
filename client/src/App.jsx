@@ -13,6 +13,10 @@ import { EventProvider } from "./context/Event.Context";
 import CreateEvent from "./components/CreateEvent";
 import ViewEvent from "./components/ViewEvent";
 import EditEvent from "./components/EditEvent";
+import ForgotPassword from "./components/ForgotPassword";
+import ResetPassword from "./components/ResetPassword";
+import ResendVerificationEmail from "./components/ResendVerificationEmail";
+import VerifyEmail from "./components/VerifyEmail";
 
 // New PublicRoute component
 
@@ -27,6 +31,16 @@ function App() {
             <Route element={<PublicRoute />}>
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route
+                path="/reset-password/:token"
+                element={<ResetPassword />}
+              />
+              <Route
+                path="/resend-verification"
+                element={<ResendVerificationEmail />}
+              />
+              <Route path="/verify-email/:token" element={<VerifyEmail />} />
             </Route>
             <Route element={<ProtectedRoute />}>
               <Route path="/profile" element={<Profile />} />
@@ -35,14 +49,6 @@ function App() {
               <Route path="/event/:eventId" element={<ViewEvent />} />
               <Route path="/event/:eventId/edit" element={<EditEvent />} />
             </Route>
-            <Route
-              path="/forgot-password"
-              element={<div>Forgot Password Placeholder</div>}
-            />
-            <Route
-              path="/resend-verification"
-              element={<div>Resend Verification Placeholder</div>}
-            />
           </Routes>
           <Footer />
         </BrowserRouter>

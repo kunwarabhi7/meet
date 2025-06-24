@@ -59,7 +59,7 @@ const SignUp = async (req, res) => {
     await newUser.save();
 
     // send verification email
-    const verificationLink = `${process.env.APP_URL}/api/user/verify-email/${verificationToken}`;
+    const verificationLink = `${process.env.APP_URL_FRONTEND}/verify-email/${verificationToken}`;
     const emailSubject = "🎉 Verify Your Email Address";
     const emailHtml = getVerificationEmail({
       name: fullName, // Use fullName as name
@@ -186,17 +186,16 @@ const forgotPassword = async (req, res) => {
     user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
     await user.save();
     // Send reset password email
-    const resetLink = `${process.env.APP_URL}/api/user/reset-password/${resetToken}`;
+    const resetLink = `${process.env.APP_URL_FRONTEND}/reset-password/${resetToken}`;
+    console.log("Reset Link:", resetLink);
     const emailBody = `
       <h1>Reset Your Password</h1>
       <p>Click the link below to reset your password:</p>
-            <a href="${resetLink}">Reset Password</a>
-
+      <a href="${resetLink}">Reset Password</a>
       <p>This link will expire in 1 hour.</p>
       <p>If you did not request a password reset, please ignore this email.</p>
-      `;
+    `;
     await sendEmail(user.email, "Reset your password", emailBody);
-    // Send a success response
 
     res.status(200).json({
       message: "Password reset email sent successfully",
@@ -206,16 +205,18 @@ const forgotPassword = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 const resetPassword = async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
   console.log("token", token, password);
   try {
-    // validate password
+    // Validate password
     const passwordErrors = validatePassword(password);
     if (passwordErrors.length > 0) {
       return res.status(400).json({ message: passwordErrors.join(", ") });
     }
+
     // Verify the token
     const decode = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decode.id;
@@ -229,11 +230,12 @@ const resetPassword = async (req, res) => {
       return res.status(400).json({ message: "Invalid or expired token" });
     }
 
-    //update the password
+    // Hash the password
     user.password = password;
-    user.resetPasswordToken = null; // Clear the reset password token after successful reset
-    user.resetPasswordExpires = null; // Clear the reset password expiration time
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = null;
     await user.save();
+
     res.status(200).json({
       message: "Password reset successfully",
     });
@@ -245,6 +247,7 @@ const resetPassword = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 const resendVerificationEmail = async (req, res) => {
   const { email } = req.body;
   try {
@@ -270,7 +273,7 @@ const resendVerificationEmail = async (req, res) => {
     user.verificationToken = verificationToken;
     await user.save();
     // Send verification email
-    const verificationLink = `${process.env.APP_URL}/api/user/verify-email/${verificationToken}`;
+    const verificationLink = `${process.env.APP_URL_FRONTEND}/verify-email/${verificationToken}`;
     const emailBody = `
     <h1>Welcome to Event Scheduler</h1>
     <p> Please verify your email address by clicking the link below:</p>
@@ -407,6 +410,32 @@ const updateProfile = async (req, res) => {
   }
 };
 
+const verifyResetToken = async (req, res) => {
+  const { token } = req.params;
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findOne({
+      _id: decoded.id,
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ message: "Invalid or expired reset token" });
+    }
+
+    res.status(200).json({ message: "Token is valid", userId: user._id });
+  } catch (error) {
+    console.error("Error verifying reset token:", error);
+    if (error.name === "TokenExpiredError") {
+      return res.status(400).json({ message: "Token expired" });
+    }
+    res.status(400).json({ message: "Invalid or expired reset token" });
+  }
+};
+
 export {
   SignUp,
   Login,
@@ -417,4 +446,5 @@ export {
   logout,
   getUser,
   updateProfile,
+  verifyResetToken,
 };
