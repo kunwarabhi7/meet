@@ -1,7 +1,10 @@
 import { Link } from "react-router-dom";
 import { FaCalendarAlt, FaBell, FaUsers } from "react-icons/fa";
+import { useAuth } from "../context/Auth.Context";
 
 const Home = () => {
+  const { user } = useAuth();
+  console.log(user, "homeee");
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Hero Section with Image */}
@@ -20,20 +23,22 @@ const Home = () => {
           <p className="text-lg sm:text-xl mb-8 animate-fade-in-up">
             Plan Events, Sync Teams, Celebrate Together
           </p>
-          <div className="flex justify-center space-x-4">
-            <Link
-              to="/signup"
-              className="inline-block px-8 py-3 bg-amber-400 text-teal-900 font-semibold rounded-md shadow-md hover:bg-amber-500 transition animate-fade-in-up"
-            >
-              Get Started
-            </Link>
-            <Link
-              to="/login"
-              className="inline-block px-8 py-3 bg-teal-600 text-white font-semibold rounded-md shadow-md hover:bg-teal-700 transition animate-fade-in-up"
-            >
-              Log In
-            </Link>
-          </div>
+          {!user && (
+            <div className="flex justify-center space-x-4">
+              <Link
+                to="/signup"
+                className="inline-block px-8 py-3 bg-amber-400 text-teal-900 font-semibold rounded-md shadow-md hover:bg-amber-500 transition animate-fade-in-up"
+              >
+                Get Started
+              </Link>
+              <Link
+                to="/login"
+                className="inline-block px-8 py-3 bg-teal-600 text-white font-semibold rounded-md shadow-md hover:bg-teal-700 transition animate-fade-in-up"
+              >
+                Log In
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
