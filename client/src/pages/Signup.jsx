@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/Auth.Context";
-
+import { useAuth } from "@/context/Auth.Context";
 const Signup = () => {
   const {
     register,
@@ -25,7 +24,6 @@ const Signup = () => {
       navigate("/verify-email");
     } catch (error) {
       console.log("Frontend signup error:", error);
-      // Capitalize first letter for better UX
       const errorMessage =
         typeof error === "string"
           ? error.charAt(0).toUpperCase() + error.slice(1)
@@ -35,14 +33,16 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-teal-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-md animate-fade-in-up">
-        <h2 className="text-3xl font-bold text-teal-700 mb-6 text-center animate-fade-in-down">
+    <div className="min-h-screen bg-teal-50 dark:bg-gray-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      {/* Theme Toggle */}
+      <div className="absolute top-4 right-4"></div>
+      <div className="max-w-md w-full bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md animate-fade-in-up">
+        <h2 className="text-3xl font-bold text-teal-700 dark:text-teal-300 mb-6 text-center animate-fade-in-down">
           Sign Up for Let's Meet
         </h2>
 
         {serverError && (
-          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md animate-fade-in">
+          <div className="mb-4 p-3 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded-md animate-fade-in">
             {serverError}
           </div>
         )}
@@ -51,7 +51,7 @@ const Signup = () => {
           <div className="mb-4">
             <label
               htmlFor="fullName"
-              className="block text-gray-700 text-sm font-medium mb-2"
+              className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2"
             >
               Full Name
             </label>
@@ -68,12 +68,12 @@ const Signup = () => {
               className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 transition transform focus:scale-100 hover:scale-100 ${
                 errors.fullName
                   ? "border-red-500 focus:ring-red-500"
-                  : "border-gray-300"
+                  : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               }`}
               placeholder="Enter your full name"
             />
             {errors.fullName && (
-              <div className="mt-1 flex items-center text-red-600 text-sm animate-fade-in">
+              <div className="mt-1 flex items-center text-red-600 dark:text-red-400 text-sm animate-fade-in">
                 <svg
                   className="w-4 h-4 mr-1"
                   fill="currentColor"
@@ -93,7 +93,7 @@ const Signup = () => {
           <div className="mb-4">
             <label
               htmlFor="username"
-              className="block text-gray-700 text-sm font-medium mb-2"
+              className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2"
             >
               Username
             </label>
@@ -111,12 +111,12 @@ const Signup = () => {
               className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 transition transform focus:scale-100 hover:scale-100 ${
                 errors.username
                   ? "border-red-500 focus:ring-red-500"
-                  : "border-gray-300"
+                  : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               }`}
               placeholder="Enter your username"
             />
             {errors.username && (
-              <div className="mt-1 flex items-center text-red-600 text-sm animate-fade-in">
+              <div className="mt-1 flex items-center text-red-600 dark:text-red-400 text-sm animate-fade-in">
                 <svg
                   className="w-4 h-4 mr-1"
                   fill="currentColor"
@@ -136,7 +136,7 @@ const Signup = () => {
           <div className="mb-4">
             <label
               htmlFor="email"
-              className="block text-gray-700 text-sm font-medium mb-2"
+              className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2"
             >
               Email
             </label>
@@ -153,12 +153,12 @@ const Signup = () => {
               className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 transition transform focus:scale-100 hover:scale-100 ${
                 errors.email
                   ? "border-red-500 focus:ring-red-500"
-                  : "border-gray-300"
+                  : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               }`}
               placeholder="Enter your email"
             />
             {errors.email && (
-              <div className="mt-1 flex items-center text-red-600 text-sm animate-fade-in">
+              <div className="mt-1 flex items-center text-red-600 dark:text-red-400 text-sm animate-fade-in">
                 <svg
                   className="w-4 h-4 mr-1"
                   fill="currentColor"
@@ -178,7 +178,7 @@ const Signup = () => {
           <div className="mb-4 relative">
             <label
               htmlFor="password"
-              className="block text-gray-700 text-sm font-medium mb-2"
+              className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2"
             >
               Password
             </label>
@@ -195,19 +195,19 @@ const Signup = () => {
               className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 transition transform focus:scale-100 hover:scale-100 ${
                 errors.password
                   ? "border-red-500 focus:ring-red-500"
-                  : "border-gray-300"
+                  : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               }`}
               placeholder="Enter your password"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-10 text-gray-600 hover:text-teal-700"
+              className="absolute right-3 top-10 text-gray-600 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400"
             >
               {showPassword ? "Hide" : "Show"}
             </button>
             {errors.password && (
-              <div className="mt-1 flex items-center text-red-600 text-sm animate-fade-in">
+              <div className="mt-1 flex items-center text-red-600 dark:text-red-400 text-sm animate-fade-in">
                 <svg
                   className="w-4 h-4 mr-1"
                   fill="currentColor"
@@ -227,7 +227,7 @@ const Signup = () => {
           <div className="mb-6 relative">
             <label
               htmlFor="confirmPassword"
-              className="block text-gray-700 text-sm font-medium mb-2"
+              className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2"
             >
               Confirm Password
             </label>
@@ -242,19 +242,19 @@ const Signup = () => {
               className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 transition transform focus:scale-100 hover:scale-100 ${
                 errors.confirmPassword
                   ? "border-red-500 focus:ring-red-500"
-                  : "border-gray-300"
+                  : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               }`}
               placeholder="Confirm your password"
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3 top-10 text-gray-600 hover:text-teal-700"
+              className="absolute right-3 top-10 text-gray-600 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400"
             >
               {showConfirmPassword ? "Hide" : "Show"}
             </button>
             {errors.confirmPassword && (
-              <div className="mt-1 flex items-center text-red-600 text-sm animate-fade-in">
+              <div className="mt-1 flex items-center text-red-600 dark:text-red-400 text-sm animate-fade-in">
                 <svg
                   className="w-4 h-4 mr-1"
                   fill="currentColor"
@@ -274,7 +274,7 @@ const Signup = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className={`w-full bg-teal-600 text-white p-3 rounded-md hover:bg-teal-700 transition font-semibold flex items-center justify-center ${
+            className={`w-full bg-teal-600 dark:bg-teal-700 text-white p-3 rounded-md hover:bg-teal-700 dark:hover:bg-teal-600 transition font-semibold flex items-center justify-center ${
               isSubmitting ? "opacity-50 cursor-not-allowed" : "animate-pulse"
             }`}
           >
@@ -304,11 +304,11 @@ const Signup = () => {
           </button>
         </form>
         <div className="mt-6 text-center">
-          <p className="text-gray-600 text-sm animate-fade-in-up">
+          <p className="text-gray-600 dark:text-gray-300 text-sm animate-fade-in-up">
             Already have an account?{" "}
             <Link
               to="/login"
-              className="text-amber-500 hover:text-amber-600 font-medium"
+              className="text-amber-500 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 font-medium"
             >
               Log In
             </Link>

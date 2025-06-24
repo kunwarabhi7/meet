@@ -131,18 +131,18 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-teal-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-md animate-fade-in-up">
-        <h2 className="text-3xl font-bold text-teal-700 mb-6 text-center animate-fade-in-down">
+    <div className="min-h-screen bg-teal-50 dark:bg-gray-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md animate-fade-in-up">
+        <h2 className="text-3xl font-bold text-teal-700 dark:text-teal-300 mb-6 text-center animate-fade-in-down">
           Your Profile
         </h2>
         {serverError && (
-          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md animate-fade-in">
+          <div className="mb-4 p-3 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded-md animate-fade-in">
             {serverError}
           </div>
         )}
         {serverSuccess && (
-          <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md animate-fade-in">
+          <div className="mb-4 p-3 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-md animate-fade-in">
             {serverSuccess}
           </div>
         )}
@@ -154,38 +154,44 @@ const Profile = () => {
                   uservalue.profilePicture || "https://via.placeholder.com/150"
                 }
                 alt="Profile"
-                className="w-32 h-32 rounded-full object-cover border-2 border-teal-500"
+                className="w-32 h-32 rounded-full object-cover border-2 border-teal-500 dark:border-teal-400"
               />
             </div>
             <div>
-              <label className="block text-gray-700 text-sm font-medium mb-1">
+              <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">
                 Full Name
               </label>
-              <p className="text-gray-900 text-lg">{uservalue.fullName}</p>
+              <p className="text-gray-900 dark:text-gray-100 text-lg">
+                {uservalue.fullName}
+              </p>
             </div>
             <div>
-              <label className="block text-gray-700 text-sm font-medium mb-1">
+              <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">
                 Username
               </label>
-              <p className="text-gray-900 text-lg">{uservalue.username}</p>
+              <p className="text-gray-900 dark:text-gray-100 text-lg">
+                {uservalue.username}
+              </p>
             </div>
             <div>
-              <label className="block text-gray-700 text-sm font-medium mb-1">
+              <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">
                 Email
               </label>
-              <p className="text-gray-900 text-lg">{uservalue.email}</p>
+              <p className="text-gray-900 dark:text-gray-100 text-lg">
+                {uservalue.email}
+              </p>
             </div>
             <div>
-              <label className="block text-gray-700 text-sm font-medium mb-1">
+              <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">
                 Bio
               </label>
-              <p className="text-gray-900 text-lg">
+              <p className="text-gray-900 dark:text-gray-100 text-lg">
                 {uservalue.bio || "No bio provided"}
               </p>
             </div>
             <button
               onClick={handleEditToggle}
-              className="w-full bg-teal-600 text-white p-3 rounded-md hover:bg-teal-700 transition font-semibold animate-pulse"
+              className="w-full bg-teal-600 dark:bg-teal-700 text-white p-3 rounded-md hover:bg-teal-700 dark:hover:bg-teal-600 transition font-semibold animate-pulse"
             >
               Edit Profile
             </button>
@@ -200,13 +206,13 @@ const Profile = () => {
                   "https://via.placeholder.com/150"
                 }
                 alt="Profile Preview"
-                className="w-32 h-32 rounded-full object-cover border-2 border-teal-500 mb-4"
+                className="w-32 h-32 rounded-full object-cover border-2 border-teal-500 dark:border-teal-400 mb-4"
               />
             </div>
             <div>
               <label
                 htmlFor="fullName"
-                className="block text-gray-700 text-sm font-medium mb-2"
+                className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2"
               >
                 Full Name
               </label>
@@ -218,15 +224,15 @@ const Profile = () => {
                     message: "Full name must be at least 3 characters",
                   },
                 })}
-                className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 transition transform focus:scale-100 hover:scale-100 ${
+                className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition transform focus:scale-100 hover:scale-100 ${
                   errors.fullName
                     ? "border-red-500 focus:ring-red-500"
-                    : "border-gray-300"
+                    : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 }`}
                 placeholder="Enter full name"
               />
               {errors.fullName && (
-                <div className="mt-1 flex items-center text-red-600 text-sm animate-fade-in">
+                <div className="mt-1 flex items-center text-red-600 dark:text-red-400 text-sm animate-fade-in">
                   <svg
                     className="w-4 h-4 mr-1"
                     fill="currentColor"
@@ -245,7 +251,7 @@ const Profile = () => {
             <div>
               <label
                 htmlFor="bio"
-                className="block text-gray-700 text-sm font-medium mb-2"
+                className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2"
               >
                 Bio
               </label>
@@ -257,16 +263,16 @@ const Profile = () => {
                     message: "Bio cannot exceed 200 characters",
                   },
                 })}
-                className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 transition transform focus:scale-100 hover:scale-100 ${
+                className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition transform focus:scale-100 hover:scale-100 ${
                   errors.bio
                     ? "border-red-500 focus:ring-red-500"
-                    : "border-gray-300"
+                    : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 }`}
                 placeholder="Tell us about yourself"
                 rows="4"
               />
               {errors.bio && (
-                <div className="mt-1 flex items-center text-red-600 text-sm animate-fade-in">
+                <div className="mt-1 flex items-center text-red-600 dark:text-red-400 text-sm animate-fade-in">
                   <svg
                     className="w-4 h-4 mr-1"
                     fill="currentColor"
@@ -285,7 +291,7 @@ const Profile = () => {
             <div>
               <label
                 htmlFor="profilePicture"
-                className="block text-gray-700 text-sm font-medium mb-2"
+                className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2"
               >
                 Profile Picture
               </label>
@@ -294,7 +300,7 @@ const Profile = () => {
                 id="profilePicture"
                 accept="image/jpeg,image/jpg,image/png,image/gif"
                 onChange={handleFileChange}
-                className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 transition transform focus:scale-100 hover:scale-100 border-gray-300"
+                className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition transform focus:scale-100 hover:scale-100 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               />
               <input type="hidden" {...register("profilePicture")} />
             </div>
@@ -302,7 +308,7 @@ const Profile = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`flex-1 bg-teal-600 text-white p-3 rounded-md hover:bg-teal-700 transition font-semibold flex items-center justify-center ${
+                className={`flex-1 bg-teal-600 dark:bg-teal-700 text-white p-3 rounded-md hover:bg-teal-700 dark:hover:bg-teal-600 transition font-semibold flex items-center justify-center ${
                   isSubmitting
                     ? "opacity-50 cursor-not-allowed"
                     : "animate-pulse"
@@ -335,7 +341,7 @@ const Profile = () => {
               <button
                 type="button"
                 onClick={handleEditToggle}
-                className="flex-1 bg-gray-300 text-gray-700 p-3 rounded-md hover:bg-gray-400 transition font-semibold"
+                className="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 p-3 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 transition font-semibold"
               >
                 Cancel
               </button>
@@ -343,11 +349,11 @@ const Profile = () => {
           </form>
         )}
         <div className="mt-6 text-center">
-          <p className="text-gray-600 text-sm animate-fade-in-up">
+          <p className="text-gray-600 dark:text-gray-300 text-sm animate-fade-in-up">
             Back to{" "}
             <Link
               to="/dashboard"
-              className="text-teal-600 hover:text-teal-700 font-medium"
+              className="text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-medium"
             >
               Dashboard
             </Link>

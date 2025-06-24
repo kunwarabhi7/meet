@@ -1,5 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/Auth.Context";
+import { ThemeProvider } from "./ui/theme-provider";
+import { ModeToggle } from "./ui/ModeToggle";
 
 const Navbar = () => {
   const { user, Logout, isLoading } = useAuth();
@@ -67,6 +69,7 @@ const Navbar = () => {
               </Link>
             </>
           )}
+          <ModeToggle />
         </div>
       </div>
     </nav>

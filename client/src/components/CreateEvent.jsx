@@ -78,22 +78,21 @@ const CreateEvent = () => {
         return acc;
       }, {})
     : {};
-
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
-        <h2 className="text-2xl font-bold text-teal-600 mb-6 text-center">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 max-w-md w-full">
+        <h2 className="text-2xl font-bold text-teal-600 dark:text-teal-300 mb-6 text-center">
           Create New Event
         </h2>
         {successMessage && (
-          <p className="text-amber-600 text-sm mb-4 text-center">
+          <p className="text-amber-600 dark:text-amber-400 text-sm mb-4 text-center">
             {successMessage}
           </p>
         )}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Event Name */}
           <div>
-            <label className="block text-gray-700 font-medium mb-1">
+            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
               Event Name
             </label>
             <input
@@ -105,20 +104,28 @@ const CreateEvent = () => {
                   message: "Name must be at least 3 characters",
                 },
               })}
-              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 ${
+                errors.name
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              }`}
               placeholder="Enter event name"
             />
             {errors.name && (
-              <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+              <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+                {errors.name.message}
+              </p>
             )}
             {apiErrors.name && (
-              <p className="text-red-500 text-sm mt-1">{apiErrors.name}</p>
+              <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+                {apiErrors.name}
+              </p>
             )}
           </div>
 
           {/* Event Date */}
           <div>
-            <label className="block text-gray-700 font-medium mb-1">
+            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
               Event Date
             </label>
             <input
@@ -128,19 +135,27 @@ const CreateEvent = () => {
                 validate: (value) =>
                   !isNaN(new Date(value).getTime()) || "Invalid date",
               })}
-              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 ${
+                errors.date
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              }`}
             />
             {errors.date && (
-              <p className="text-red-500 text-sm mt-1">{errors.date.message}</p>
+              <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+                {errors.date.message}
+              </p>
             )}
             {apiErrors.date && (
-              <p className="text-red-500 text-sm mt-1">{apiErrors.date}</p>
+              <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+                {apiErrors.date}
+              </p>
             )}
           </div>
 
           {/* Event Time */}
           <div>
-            <label className="block text-gray-700 font-medium mb-1">
+            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
               Event Time (e.g., 6:30 PM)
             </label>
             <Controller
@@ -153,21 +168,29 @@ const CreateEvent = () => {
                   onChange={field.onChange}
                   value={field.value}
                   disableClock
-                  className="w-full border border-gray-300 rounded-md p-2"
+                  className={`w-full border rounded-md p-2 ${
+                    errors.time
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  }`}
                 />
               )}
             />
             {errors.time && (
-              <p className="text-red-500 text-sm mt-1">{errors.time.message}</p>
+              <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+                {errors.time.message}
+              </p>
             )}
             {apiErrors.time && (
-              <p className="text-red-500 text-sm mt-1">{apiErrors.time}</p>
+              <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+                {apiErrors.time}
+              </p>
             )}
           </div>
 
           {/* Location */}
           <div>
-            <label className="block text-gray-700 font-medium mb-1">
+            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
               Location
             </label>
             <input
@@ -179,28 +202,34 @@ const CreateEvent = () => {
                   message: "Location must be at least 3 characters",
                 },
               })}
-              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 ${
+                errors.location
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              }`}
               placeholder="Enter event location"
             />
             {errors.location && (
-              <p className="text-red-500 text-sm mt-1">
+              <p className="text-red-500 dark:text-red-400 text-sm mt-1">
                 {errors.location.message}
               </p>
             )}
             {apiErrors.location && (
-              <p className="text-red-500 text-sm mt-1">{apiErrors.location}</p>
+              <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+                {apiErrors.location}
+              </p>
             )}
           </div>
 
           {/* Location Picker */}
-          <label className="font-medium block mt-4 mb-1">
+          <label className="font-medium block mt-4 mb-1 text-gray-700 dark:text-gray-300">
             Pick Event Location:
           </label>
           <LocationPicker setLocation={setLocation} />
 
           {/* Description */}
           <div>
-            <label className="block text-gray-700 font-medium mb-1">
+            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
               Description
             </label>
             <textarea
@@ -211,17 +240,21 @@ const CreateEvent = () => {
                   message: "Description must be at least 10 characters",
                 },
               })}
-              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 ${
+                errors.description
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              }`}
               placeholder="Describe your event"
               rows="4"
             />
             {errors.description && (
-              <p className="text-red-500 text-sm mt-1">
+              <p className="text-red-500 dark:text-red-400 text-sm mt-1">
                 {errors.description.message}
               </p>
             )}
             {apiErrors.description && (
-              <p className="text-red-500 text-sm mt-1">
+              <p className="text-red-500 dark:text-red-400 text-sm mt-1">
                 {apiErrors.description}
               </p>
             )}
@@ -229,7 +262,7 @@ const CreateEvent = () => {
 
           {/* Max Attendees */}
           <div>
-            <label className="block text-gray-700 font-medium mb-1">
+            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
               Max Attendees
             </label>
             <input
@@ -238,16 +271,20 @@ const CreateEvent = () => {
                 required: "Max attendees is required",
                 min: { value: 1, message: "Must allow at least 1 attendee" },
               })}
-              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 ${
+                errors.maxAttendees
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              }`}
               placeholder="Enter max attendees"
             />
             {errors.maxAttendees && (
-              <p className="text-red-500 text-sm mt-1">
+              <p className="text-red-500 dark:text-red-400 text-sm mt-1">
                 {errors.maxAttendees.message}
               </p>
             )}
             {apiErrors.maxAttendees && (
-              <p className="text-red-500 text-sm mt-1">
+              <p className="text-red-500 dark:text-red-400 text-sm mt-1">
                 {apiErrors.maxAttendees}
               </p>
             )}
@@ -259,8 +296,8 @@ const CreateEvent = () => {
             disabled={isLoading}
             className={`w-full py-2 px-4 rounded-md text-white font-medium ${
               isLoading
-                ? "bg-teal-400 cursor-not-allowed"
-                : "bg-teal-600 hover:bg-teal-700"
+                ? "bg-teal-400 dark:bg-teal-500 cursor-not-allowed"
+                : "bg-teal-600 dark:bg-teal-700 hover:bg-teal-700 dark:hover:bg-teal-600"
             } transition-colors duration-200`}
           >
             {isLoading ? "Creating..." : "Create Event"}
