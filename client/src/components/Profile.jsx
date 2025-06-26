@@ -131,73 +131,81 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-teal-50 dark:bg-gray-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md animate-fade-in-up">
-        <h2 className="text-3xl font-bold text-teal-700 dark:text-teal-300 mb-6 text-center animate-fade-in-down">
+    <div className="min-h-screen bg-gradient-to-b from-teal-100 to-teal-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full bg-white dark:bg-gray-800/90 p-8 rounded-2xl shadow-xl border border-teal-200 dark:border-teal-700 animate-fade-in-up">
+        {/* Header */}
+        <h2 className="text-4xl font-extrabold text-teal-700 dark:text-teal-300 mb-8 text-center animate-fade-in-down tracking-tight">
           Your Profile
         </h2>
+
+        {/* Server Error */}
         {serverError && (
-          <div className="mb-4 p-3 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded-md animate-fade-in">
-            {serverError}
+          <div className="mb-6 p-6 bg-red-100 dark:bg-red-900/50 border-l-4 border-red-500 dark:border-red-400 text-red-700 dark:text-red-300 rounded-xl shadow-md animate-fade-in">
+            <p className="font-semibold text-lg">{serverError}</p>
           </div>
         )}
+
+        {/* Server Success */}
         {serverSuccess && (
-          <div className="mb-4 p-3 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-md animate-fade-in">
-            {serverSuccess}
+          <div className="mb-6 p-6 bg-green-100 dark:bg-green-900/50 border-l-4 border-green-500 dark:border-green-400 text-green-700 dark:text-green-300 rounded-xl shadow-md animate-fade-in">
+            <p className="font-semibold text-lg">{serverSuccess}</p>
           </div>
         )}
+
+        {/* Profile View Mode */}
         {!isEditing ? (
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div className="flex justify-center">
               <img
                 src={
                   uservalue.profilePicture || "https://via.placeholder.com/150"
                 }
                 alt="Profile"
-                className="w-32 h-32 rounded-full object-cover border-2 border-teal-500 dark:border-teal-400"
+                className="w-36 h-36 rounded-full object-cover border-4 border-teal-500 dark:border-teal-400 shadow-md"
               />
             </div>
             <div>
-              <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">
+              <label className="block text-gray-600 dark:text-gray-300 text-sm font-semibold mb-2 tracking-tight">
                 Full Name
               </label>
-              <p className="text-gray-900 dark:text-gray-100 text-lg">
+              <p className="text-gray-900 dark:text-gray-100 text-xl font-medium">
                 {uservalue.fullName}
               </p>
             </div>
             <div>
-              <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">
+              <label className="block text-gray-600 dark:text-gray-300 text-sm font-semibold mb-2 tracking-tight">
                 Username
               </label>
-              <p className="text-gray-900 dark:text-gray-100 text-lg">
+              <p className="text-gray-900 dark:text-gray-100 text-xl font-medium">
                 {uservalue.username}
               </p>
             </div>
             <div>
-              <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">
+              <label className="block text-gray-600 dark:text-gray-300 text-sm font-semibold mb-2 tracking-tight">
                 Email
               </label>
-              <p className="text-gray-900 dark:text-gray-100 text-lg">
+              <p className="text-gray-900 dark:text-gray-100 text-xl font-medium">
                 {uservalue.email}
               </p>
             </div>
             <div>
-              <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">
+              <label className="block text-gray-600 dark:text-gray-300 text-sm font-semibold mb-2 tracking-tight">
                 Bio
               </label>
-              <p className="text-gray-900 dark:text-gray-100 text-lg">
+              <p className="text-gray-900 dark:text-gray-100 text-xl font-medium leading-relaxed">
                 {uservalue.bio || "No bio provided"}
               </p>
             </div>
             <button
               onClick={handleEditToggle}
-              className="w-full bg-teal-600 dark:bg-teal-700 text-white p-3 rounded-md hover:bg-teal-700 dark:hover:bg-teal-600 transition font-semibold animate-pulse"
+              className="w-full bg-teal-600 dark:bg-teal-700 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:bg-teal-700 dark:hover:bg-teal-600 transition-all duration-300 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400"
             >
               Edit Profile
             </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          /* Profile Edit Mode */
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="flex justify-center">
               <img
                 src={
@@ -206,13 +214,13 @@ const Profile = () => {
                   "https://via.placeholder.com/150"
                 }
                 alt="Profile Preview"
-                className="w-32 h-32 rounded-full object-cover border-2 border-teal-500 dark:border-teal-400 mb-4"
+                className="w-36 h-36 rounded-full object-cover border-4 border-teal-500 dark:border-teal-400 shadow-md mb-4"
               />
             </div>
             <div>
               <label
                 htmlFor="fullName"
-                className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2"
+                className="block text-gray-600 dark:text-gray-300 text-sm font-semibold mb-2 tracking-tight"
               >
                 Full Name
               </label>
@@ -224,7 +232,7 @@ const Profile = () => {
                     message: "Full name must be at least 3 characters",
                   },
                 })}
-                className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition transform focus:scale-100 hover:scale-100 ${
+                className={`w-full p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all duration-200 shadow-sm hover:shadow-md ${
                   errors.fullName
                     ? "border-red-500 focus:ring-red-500"
                     : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
@@ -232,9 +240,9 @@ const Profile = () => {
                 placeholder="Enter full name"
               />
               {errors.fullName && (
-                <div className="mt-1 flex items-center text-red-600 dark:text-red-400 text-sm animate-fade-in">
+                <div className="mt-2 flex items-center text-red-600 dark:text-red-400 text-sm animate-fade-in">
                   <svg
-                    className="w-4 h-4 mr-1"
+                    className="w-5 h-5 mr-1"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -251,7 +259,7 @@ const Profile = () => {
             <div>
               <label
                 htmlFor="bio"
-                className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2"
+                className="block text-gray-600 dark:text-gray-300 text-sm font-semibold mb-2 tracking-tight"
               >
                 Bio
               </label>
@@ -263,18 +271,18 @@ const Profile = () => {
                     message: "Bio cannot exceed 200 characters",
                   },
                 })}
-                className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition transform focus:scale-100 hover:scale-100 ${
+                className={`w-full p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all duration-200 shadow-sm hover:shadow-md ${
                   errors.bio
                     ? "border-red-500 focus:ring-red-500"
                     : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 }`}
                 placeholder="Tell us about yourself"
-                rows="4"
+                rows="5"
               />
               {errors.bio && (
-                <div className="mt-1 flex items-center text-red-600 dark:text-red-400 text-sm animate-fade-in">
+                <div className="mt-2 flex items-center text-red-600 dark:text-red-400 text-sm animate-fade-in">
                   <svg
-                    className="w-4 h-4 mr-1"
+                    className="w-5 h-5 mr-1"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -291,7 +299,7 @@ const Profile = () => {
             <div>
               <label
                 htmlFor="profilePicture"
-                className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2"
+                className="block text-gray-600 dark:text-gray-300 text-sm font-semibold mb-2 tracking-tight"
               >
                 Profile Picture
               </label>
@@ -300,60 +308,66 @@ const Profile = () => {
                 id="profilePicture"
                 accept="image/jpeg,image/jpg,image/png,image/gif"
                 onChange={handleFileChange}
-                className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition transform focus:scale-100 hover:scale-100 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all duration-200 shadow-sm hover:shadow-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-teal-600 dark:file:bg-teal-700 file:text-white file:font-semibold file:hover:bg-teal-700 dark:file:hover:bg-teal-600"
               />
               <input type="hidden" {...register("profilePicture")} />
             </div>
-            <div className="flex space-x-4">
+            <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`flex-1 bg-teal-600 dark:bg-teal-700 text-white p-3 rounded-md hover:bg-teal-700 dark:hover:bg-teal-600 transition font-semibold flex items-center justify-center ${
+                className={`flex-1 px-6 py-3 rounded-lg font-semibold text-white shadow-md transition-all duration-300 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 ${
                   isSubmitting
-                    ? "opacity-50 cursor-not-allowed"
-                    : "animate-pulse"
+                    ? "bg-teal-400 dark:bg-teal-500 opacity-50 cursor-not-allowed"
+                    : "bg-teal-600 dark:bg-teal-700 hover:bg-teal-700 dark:hover:bg-teal-600"
                 }`}
               >
                 {isSubmitting ? (
-                  <svg
-                    className="animate-spin h-5 w-5 mr-2 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                    />
-                  </svg>
-                ) : null}
-                {isSubmitting ? "Saving..." : "Save Changes"}
+                  <div className="flex items-center justify-center">
+                    <svg
+                      className="animate-spin h-5 w-5 mr-2 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                      />
+                    </svg>
+                    Saving...
+                  </div>
+                ) : (
+                  "Save Changes"
+                )}
               </button>
               <button
                 type="button"
                 onClick={handleEditToggle}
-                className="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 p-3 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 transition font-semibold"
+                className="flex-1 px-6 py-3 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg font-semibold shadow-md hover:bg-gray-400 dark:hover:bg-gray-500 transition-all duration-300 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500"
               >
                 Cancel
               </button>
             </div>
           </form>
         )}
-        <div className="mt-6 text-center">
-          <p className="text-gray-600 dark:text-gray-300 text-sm animate-fade-in-up">
+
+        {/* Back to Dashboard */}
+        <div className="mt-8 text-center">
+          <p className="text-gray-600 dark:text-gray-300 text-base font-medium animate-fade-in-up">
             Back to{" "}
             <Link
               to="/dashboard"
-              className="text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-medium"
+              className="text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-semibold hover:underline transition-all duration-200"
             >
               Dashboard
             </Link>

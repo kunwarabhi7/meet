@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { useEvent } from "../context/Event.Context";
 import LocationPicker from "./LocationPicker";
-import TimePicker from "react-time-picker";
-import "react-time-picker/dist/TimePicker.css";
 import {
   Select,
   SelectContent,
@@ -16,6 +14,7 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
+import { ModeToggle } from "./ui/ModeToggle";
 
 const CreateEvent = () => {
   const [successMessage, setSuccessMessage] = useState(null);
@@ -73,9 +72,7 @@ const CreateEvent = () => {
       }
       const formattedDate = data.date;
       const formattedTime = data.time
-        ? new Date(
-            `1970-01-01T${data.time.replace("Z", "")}`
-          ).toLocaleTimeString("en-US", {
+        ? new Date(`1970-01-01T${data.time}`).toLocaleTimeString("en-US", {
             hour: "numeric",
             minute: "2-digit",
             hour12: true,
@@ -131,20 +128,23 @@ const CreateEvent = () => {
     : {};
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 max-w-md w-full">
-        <h2 className="text-2xl font-bold text-teal-600 dark:text-teal-300 mb-6 text-center">
+    <div className="min-h-screen bg-gradient-to-b from-teal-100 to-teal-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="bg-white dark:bg-gray-800/90 rounded-2xl shadow-xl border border-teal-200 dark:border-teal-700 p-8 max-w-lg w-full animate-fade-in-up">
+        <h2 className="text-4xl font-extrabold text-teal-700 dark:text-teal-300 mb-8 text-center animate-fade-in-down tracking-tight">
           Create New Event
         </h2>
         {successMessage && (
-          <p className="text-amber-600 dark:text-amber-400 text-sm mb-4 text-center">
-            {successMessage}
-          </p>
+          <div className="mb-6 p-6 bg-amber-100 dark:bg-amber-900/50 border-l-4 border-amber-500 dark:border-amber-400 text-amber-700 dark:text-amber-300 rounded-xl shadow-md animate-fade-in">
+            <p className="font-semibold text-lg">{successMessage}</p>
+          </div>
         )}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Event Name */}
           <div>
-            <Label htmlFor="name" className="block font-medium mb-1">
+            <Label
+              htmlFor="name"
+              className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-2 tracking-tight"
+            >
               Event Name
             </Label>
             <Input
@@ -157,19 +157,33 @@ const CreateEvent = () => {
                   message: "Name must be at least 3 characters",
                 },
               })}
+              className="w-full p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all duration-200 shadow-sm hover:shadow-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               placeholder="Enter event name"
             />
-            {errors.name && (
-              <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
-            )}
-            {apiErrors.name && (
-              <p className="text-red-500 text-sm mt-1">{apiErrors.name}</p>
+            {(errors.name || apiErrors.name) && (
+              <div className="mt-2 flex items-center text-red-600 dark:text-red-400 text-sm animate-fade-in">
+                <svg
+                  className="w-5 h-5 mr-1"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                {errors.name?.message || apiErrors.name}
+              </div>
             )}
           </div>
 
           {/* Event Date */}
           <div>
-            <Label htmlFor="date" className="block font-medium mb-1">
+            <Label
+              htmlFor="date"
+              className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-2 tracking-tight"
+            >
               Event Date
             </Label>
             <Input
@@ -180,45 +194,71 @@ const CreateEvent = () => {
                 validate: (value) =>
                   !isNaN(new Date(value).getTime()) || "Invalid date",
               })}
+              className="w-full p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all duration-200 shadow-sm hover:shadow-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
-            {errors.date && (
-              <p className="text-red-500 text-sm mt-1">{errors.date.message}</p>
-            )}
-            {apiErrors.date && (
-              <p className="text-red-500 text-sm mt-1">{apiErrors.date}</p>
+            {(errors.date || apiErrors.date) && (
+              <div className="mt-2 flex items-center text-red-600 dark:text-red-400 text-sm animate-fade-in">
+                <svg
+                  className="w-5 h-5 mr-1"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                {errors.date?.message || apiErrors.date}
+              </div>
             )}
           </div>
 
           {/* Event Time */}
-          <div className="text-gray-900 dark:text-gray-400">
-            <Label htmlFor="time" className="block font-medium mb-1">
-              Event Time (e.g., 6:30 PM)
+          <div>
+            <Label
+              htmlFor="time"
+              className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-2 tracking-tight"
+            >
+              Event Time
             </Label>
             <Controller
               name="time"
               control={control}
               rules={{ required: "Event time is required" }}
               render={({ field }) => (
-                <TimePicker
+                <Input
+                  id="time"
+                  type="time"
                   {...field}
-                  onChange={field.onChange}
-                  value={field.value}
-                  disableClock
-                  className="w-full p-2 border rounded-md"
+                  className="w-full p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all duration-200 shadow-sm hover:shadow-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 />
               )}
             />
-            {errors.time && (
-              <p className="text-red-500 text-sm mt-1">{errors.time.message}</p>
-            )}
-            {apiErrors.time && (
-              <p className="text-red-500 text-sm mt-1">{apiErrors.time}</p>
+            {(errors.time || apiErrors.time) && (
+              <div className="mt-2 flex items-center text-red-600 dark:text-red-400 text-sm animate-fade-in">
+                <svg
+                  className="w-5 h-5 mr-1"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                {errors.time?.message || apiErrors.time}
+              </div>
             )}
           </div>
 
           {/* Location */}
           <div>
-            <Label htmlFor="location" className="block font-medium mb-1">
+            <Label
+              htmlFor="location"
+              className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-2 tracking-tight"
+            >
               Location
             </Label>
             <Input
@@ -231,29 +271,41 @@ const CreateEvent = () => {
                   message: "Location must be at least 3 characters",
                 },
               })}
+              className="w-full p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all duration-200 shadow-sm hover:shadow-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               placeholder="Enter event location"
             />
-            {errors.location && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.location.message}
-              </p>
-            )}
-            {apiErrors.location && (
-              <p className="text-red-500 text-sm mt-1">{apiErrors.location}</p>
+            {(errors.location || apiErrors.location) && (
+              <div className="mt-2 flex items-center text-red-600 dark:text-red-400 text-sm animate-fade-in">
+                <svg
+                  className="w-5 h-5 mr-1"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                {errors.location?.message || apiErrors.location}
+              </div>
             )}
           </div>
 
           {/* Location Picker */}
           <div>
-            <Label className="block font-medium mt-4 mb-1">
-              Pick Event Location:
+            <Label className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-2 tracking-tight">
+              Pick Event Location
             </Label>
             <LocationPicker setLocation={setLocation} />
           </div>
 
           {/* Category */}
           <div>
-            <Label htmlFor="category" className="block font-medium mb-1">
+            <Label
+              htmlFor="category"
+              className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-2 tracking-tight"
+            >
               Category
             </Label>
             <Controller
@@ -270,13 +322,17 @@ const CreateEvent = () => {
                 >
                   <SelectTrigger
                     id="category"
-                    className="bg-white dark:bg-gray-700"
+                    className="w-full p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all duration-200 shadow-sm hover:shadow-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   >
                     <SelectValue placeholder="Select Category" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white dark:bg-gray-700">
+                  <SelectContent className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
                     {Object.keys(categories).map((category) => (
-                      <SelectItem key={category} value={category}>
+                      <SelectItem
+                        key={category}
+                        value={category}
+                        className="text-gray-900 dark:text-gray-100 hover:bg-teal-100 dark:hover:bg-teal-900/50"
+                      >
                         {category}
                       </SelectItem>
                     ))}
@@ -284,19 +340,30 @@ const CreateEvent = () => {
                 </Select>
               )}
             />
-            {errors.category && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.category.message}
-              </p>
-            )}
-            {apiErrors.category && (
-              <p className="text-red-500 text-sm mt-1">{apiErrors.category}</p>
+            {(errors.category || apiErrors.category) && (
+              <div className="mt-2 flex items-center text-red-600 dark:text-red-400 text-sm animate-fade-in">
+                <svg
+                  className="w-5 h-5 mr-1"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                {errors.category?.message || apiErrors.category}
+              </div>
             )}
           </div>
 
           {/* Sub-Category */}
           <div>
-            <Label htmlFor="subCategory" className="block font-medium mb-1">
+            <Label
+              htmlFor="subCategory"
+              className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-2 tracking-tight"
+            >
               Sub-Category
             </Label>
             <Controller
@@ -311,13 +378,17 @@ const CreateEvent = () => {
                 >
                   <SelectTrigger
                     id="subCategory"
-                    className="bg-white dark:bg-gray-700"
+                    className="w-full p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all duration-200 shadow-sm hover:shadow-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   >
                     <SelectValue placeholder="Select Sub-Category" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white dark:bg-gray-700">
+                  <SelectContent className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
                     {categories[selectedCategory]?.map((subCategory) => (
-                      <SelectItem key={subCategory} value={subCategory}>
+                      <SelectItem
+                        key={subCategory}
+                        value={subCategory}
+                        className="text-gray-900 dark:text-gray-100 hover:bg-teal-100 dark:hover:bg-teal-900/50"
+                      >
                         {subCategory}
                       </SelectItem>
                     ))}
@@ -325,21 +396,30 @@ const CreateEvent = () => {
                 </Select>
               )}
             />
-            {errors.subCategory && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.subCategory.message}
-              </p>
-            )}
-            {apiErrors.subCategory && (
-              <p className="text-red-500 text-sm mt-1">
-                {apiErrors.subCategory}
-              </p>
+            {(errors.subCategory || apiErrors.subCategory) && (
+              <div className="mt-2 flex items-center text-red-600 dark:text-red-400 text-sm animate-fade-in">
+                <svg
+                  className="w-5 h-5 mr-1"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                {errors.subCategory?.message || apiErrors.subCategory}
+              </div>
             )}
           </div>
 
           {/* Description */}
           <div>
-            <Label htmlFor="description" className="block font-medium mb-1">
+            <Label
+              htmlFor="description"
+              className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-2 tracking-tight"
+            >
               Description
             </Label>
             <Textarea
@@ -351,24 +431,34 @@ const CreateEvent = () => {
                   message: "Description must be at least 10 characters",
                 },
               })}
+              className="w-full p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all duration-200 shadow-sm hover:shadow-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               placeholder="Describe your event"
               rows="4"
             />
-            {errors.description && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.description.message}
-              </p>
-            )}
-            {apiErrors.description && (
-              <p className="text-red-500 text-sm mt-1">
-                {apiErrors.description}
-              </p>
+            {(errors.description || apiErrors.description) && (
+              <div className="mt-2 flex items-center text-red-600 dark:text-red-400 text-sm animate-fade-in">
+                <svg
+                  className="w-5 h-5 mr-1"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                {errors.description?.message || apiErrors.description}
+              </div>
             )}
           </div>
 
           {/* Max Attendees */}
           <div>
-            <Label htmlFor="maxAttendees" className="block font-medium mb-1">
+            <Label
+              htmlFor="maxAttendees"
+              className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-2 tracking-tight"
+            >
               Max Attendees
             </Label>
             <Input
@@ -378,23 +468,64 @@ const CreateEvent = () => {
                 required: "Max attendees is required",
                 min: { value: 1, message: "Must allow at least 1 attendee" },
               })}
+              className="w-full p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all duration-200 shadow-sm hover:shadow-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               placeholder="Enter max attendees"
             />
-            {errors.maxAttendees && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.maxAttendees.message}
-              </p>
-            )}
-            {apiErrors.maxAttendees && (
-              <p className="text-red-500 text-sm mt-1">
-                {apiErrors.maxAttendees}
-              </p>
+            {(errors.maxAttendees || apiErrors.maxAttendees) && (
+              <div className="mt-2 flex items-center text-red-600 dark:text-red-400 text-sm animate-fade-in">
+                <svg
+                  className="w-5 h-5 mr-1"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                {errors.maxAttendees?.message || apiErrors.maxAttendees}
+              </div>
             )}
           </div>
 
           {/* Submit Button */}
-          <Button type="submit" disabled={isLoading} className="w-full">
-            {isLoading ? "Creating..." : "Create Event"}
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className={`w-full px-6 py-3 rounded-lg font-semibold text-white shadow-md transition-all duration-300 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 ${
+              isLoading
+                ? "bg-teal-400 dark:bg-teal-500 opacity-50 cursor-not-allowed"
+                : "bg-teal-600 dark:bg-teal-700 hover:bg-teal-700 dark:hover:bg-teal-600"
+            }`}
+          >
+            {isLoading ? (
+              <div className="flex items-center justify-center">
+                <svg
+                  className="animate-spin h-5 w-5 mr-2 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v8h8a8 8 0 01-8 8 8 8 0 01-8-8z"
+                  />
+                </svg>
+                Creating...
+              </div>
+            ) : (
+              "Create Event"
+            )}
           </Button>
         </form>
       </div>

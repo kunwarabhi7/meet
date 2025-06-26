@@ -43,86 +43,103 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-teal-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b from-teal-100 to-teal-50 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-bold text-teal-700 dark:text-teal-300 mb-6 text-center animate-fade-in-down">
+        {/* Header */}
+        <h2 className="text-4xl font-extrabold text-teal-700 dark:text-teal-300 mb-10 text-center animate-fade-in-down tracking-tight">
           Welcome to Your Dashboard, {user?.fullName || "User"}!
         </h2>
 
         {/* Create Event Button */}
-        <div className="flex justify-end mb-6">
+        <div className="flex justify-end mb-8">
           <button
             onClick={handleCreateEvent}
-            className="bg-teal-600 dark:bg-teal-700 text-white p-3 rounded-md hover:bg-teal-700 dark:hover:bg-teal-600 transition font-semibold animate-pulse"
+            className="px-6 py-3 bg-teal-600 dark:bg-teal-700 text-white rounded-lg font-semibold shadow-md hover:bg-teal-700 dark:hover:bg-teal-600 transition-all duration-300 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400"
           >
             Create New Event
           </button>
         </div>
 
-        <div className="mb-6">
+        {/* Category Filter */}
+        <div className="mb-8">
           <Select onValueChange={setSelectedCategory} value={selectedCategory}>
-            <SelectTrigger className="w-full sm:w-60">
+            <SelectTrigger className="w-full sm:w-64 bg-white dark:bg-gray-800 border-teal-200 dark:border-teal-700 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400">
               <SelectValue placeholder="Filter by Category" />
             </SelectTrigger>
-            <SelectContent className="bg-white dark:bg-gray-700">
-              <SelectItem className="bg-white dark:bg-gray-700" value="all">
+            <SelectContent className="bg-white dark:bg-gray-800/90 border-teal-200 dark:border-teal-700 rounded-lg shadow-xl">
+              <SelectItem
+                value="all"
+                className="text-gray-700 dark:text-gray-200 hover:bg-teal-100 dark:hover:bg-teal-900/50 focus:bg-teal-100 dark:focus:bg-teal-900/50"
+              >
                 All Categories
               </SelectItem>
-              {[...new Set(events.map((event) => event.category))]
-                .filter(
-                  (category) =>
-                    category &&
-                    typeof category === "string" &&
-                    category.trim() !== ""
-                )
-                .map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
+              {[
+                "🎉 Social Events",
+                "🏢 Corporate Events",
+                "🎓 Educational Events",
+                "🎨 Cultural & Entertainment",
+                "🏃 Sports & Fitness",
+                "💒 Religious & Spiritual",
+                "🌱 Community & Charity",
+                "🛍️ Market & Expo",
+              ].map((category) => (
+                <SelectItem
+                  key={category}
+                  value={category}
+                  className="text-gray-700 dark:text-gray-200 hover:bg-teal-100 dark:hover:bg-teal-900/50 focus:bg-teal-100 dark:focus:bg-teal-900/50"
+                >
+                  {category}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
 
         {/* Loading State */}
         {isLoading && (
-          <p className="text-center text-gray-600 dark:text-gray-300 animate-pulse">
-            Loading Events...
-          </p>
+          <div className="text-center py-16">
+            <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-teal-600 dark:border-teal-400 border-r-transparent"></div>
+            <p className="text-gray-600 dark:text-gray-300 mt-4 text-xl animate-pulse font-medium">
+              Loading Events...
+            </p>
+          </div>
         )}
 
         {/* Error State */}
         {error && error.length > 0 && (
-          <p className="text-center text-red-600 dark:text-red-400 animate-fade-in">
-            Error: {error.map((err) => err.message).join(", ")}
-          </p>
+          <div className="bg-red-100 dark:bg-red-900/50 border-l-4 border-red-500 dark:border-red-400 text-red-700 dark:text-red-300 p-6 rounded-xl mb-8 animate-fade-in shadow-md">
+            <p className="font-semibold text-lg">Error:</p>
+            <p>{error.map((err) => err.message).join(", ")}</p>
+          </div>
         )}
 
         {/* Events List */}
         {!isLoading && (!error || error.length === 0) && (
           <div className="space-y-6">
             {filteredEvents.length === 0 ? (
-              <p className="text-center text-gray-600 dark:text-gray-300 animate-fade-in">
-                No events found. Create your first event!
-              </p>
+              <div className="text-center py-12 bg-gray-100 dark:bg-gray-800/50 rounded-xl shadow-inner">
+                <p className="text-gray-600 dark:text-gray-300 text-lg animate-fade-in font-medium">
+                  No events found. Create your first event!
+                </p>
+              </div>
             ) : (
               filteredEvents.map((event, id) => (
                 <div
                   key={id}
-                  className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md animate-fade-in-up border-l-4 border-teal-600 dark:border-teal-400"
+                  className="bg-white dark:bg-gray-800/90 p-6 rounded-2xl shadow-xl border-l-4 border-teal-600 dark:border-teal-400 animate-fade-in-up hover:shadow-2xl transition-all duration-300"
                 >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4">
+                    <div className="flex items-center gap-4">
                       <img
                         src={
                           event.organizer?.profilePicture ||
-                          "https://via.placeholder.com/40"
+                          "https://via.placeholder.com/48"
                         }
                         alt={event.organizer?.fullName || "Organizer"}
-                        className="w-10 h-10 rounded-full mr-3 border-2 border-teal-500 object-cover"
+                        className="w-12 h-12 rounded-full object-cover border-4 border-teal-500 dark:border-teal-400 shadow-sm"
                       />
                       <div>
-                        <h3 className="text-lg font-semibold text-teal-700 dark:text-teal-300">
+                        <h3 className="text-xl font-bold text-teal-700 dark:text-teal-300 tracking-tight">
                           {event.name}
                         </h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -132,26 +149,35 @@ const Dashboard = () => {
                     </div>
                     <Link
                       to={`/event/${event._id}`}
-                      className="text-sm text-amber-600 hover:underline font-medium"
+                      className="mt-3 sm:mt-0 text-base text-amber-600 dark:text-amber-400 font-semibold hover:text-amber-700 dark:hover:text-amber-500 hover:underline transition-all duration-200"
                     >
                       View Details →
                     </Link>
                   </div>
 
-                  <div className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700 dark:text-gray-200 text-base">
                     <p>
-                      📅 <span className="font-medium">Date:</span>{" "}
+                      <span className="font-semibold text-teal-600 dark:text-teal-400">
+                        📅 Date:
+                      </span>{" "}
                       {formatDate(event.eventDate)}
                     </p>
                     <p>
-                      🕒 <span className="font-medium">Time:</span> {event.time}
+                      <span className="font-semibold text-teal-600 dark:text-teal-400">
+                        🕒 Time:
+                      </span>{" "}
+                      {event.time}
                     </p>
                     <p>
-                      📍 <span className="font-medium">Location:</span>{" "}
+                      <span className="font-semibold text-teal-600 dark:text-teal-400">
+                        📍 Location:
+                      </span>{" "}
                       {event.location?.address || "N/A"}
                     </p>
                     <p>
-                      🗂️ <span className="font-medium">Category:</span>{" "}
+                      <span className="font-semibold text-teal-600 dark:text-teal-400">
+                        🗂️ Category:
+                      </span>{" "}
                       {event.category} / {event.subCategory}
                     </p>
                   </div>

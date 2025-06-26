@@ -2,13 +2,10 @@ import { useEffect, useRef } from "react";
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { useEvent } from "../context/Event.Context";
 import { useAuth } from "../context/Auth.Context";
-import axios from "axios";
-import AddComment from "./AddComment";
-import { FiMapPin } from "react-icons/fi";
-
 import { toast } from "react-toastify";
-
+import { FiMapPin } from "react-icons/fi";
 import { FaWhatsapp } from "react-icons/fa";
+import AddComment from "./AddComment";
 import axiosInstance from "../utils/axionInstance";
 
 const ViewEvent = () => {
@@ -53,7 +50,7 @@ const ViewEvent = () => {
   const handleJoinEvent = async () => {
     const token = localStorage.getItem("token");
     if (!token || !user) {
-      alert("Please login first 😏");
+      toast.error("Please login first 😏");
       navigate("/login");
       return;
     }
@@ -64,17 +61,17 @@ const ViewEvent = () => {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert(response.data.message);
+      toast.success(response.data.message);
       await fetchEventById(eventId, true);
     } catch (error) {
       const errorMsg = error.response?.data?.error || "Something went wrong 😔";
       if (error.response?.status === 401) {
-        alert("Session expired, please login again 😏");
+        toast.error("Session expired, please login again 😏");
         navigate("/login");
       } else if (error.response?.status === 404) {
-        alert("Event not found 😔");
+        toast.error("Event not found 😔");
       } else {
-        alert(errorMsg);
+        toast.error(errorMsg);
       }
     }
   };
@@ -83,8 +80,10 @@ const ViewEvent = () => {
     if (window.confirm("Are you sure you want to delete this event?")) {
       try {
         await deleteEvent(eventId);
+        toast.success("Event deleted successfully!");
         navigate("/dashboard");
       } catch (err) {
+        toast.error("Failed to delete event 😔");
         console.error("Failed to delete event:", err);
       }
     }
@@ -94,13 +93,12 @@ const ViewEvent = () => {
     const token = localStorage.getItem("token");
     try {
       await axiosInstance.delete(`/event/${eventId}/comment/${commentId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
+      toast.success("Comment deleted successfully!");
       await fetchEventById(eventId, true);
     } catch (err) {
-      alert("Failed to delete comment.");
+      toast.error("Failed to delete comment 😔");
       console.error("Error deleting comment:", err);
     }
   };
@@ -134,34 +132,29 @@ const ViewEvent = () => {
       await navigator.clipboard.writeText(res.data.shareUrl);
       toast.success("Event link copied to clipboard!");
     } catch (error) {
-      console.error(err);
       toast.error("Failed to generate share link 😔");
+      console.error("Error generating share link:", error);
     }
   };
 
-  // const handleWhatsAppShare = () => {
-  //   const message = `Check out this event: ${window.location.href}`;
-  //   const encodedMessage = encodeURIComponent(message);
-  //   const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
-  //   window.open(whatsappUrl, "_blank");
-  // };
-  console.log(guests, "guestss");
   const isOrganizer =
     user?.id &&
     event?.organizer?._id &&
     user.id.toString() === event.organizer._id.toString();
 
   return (
-    <div className="min-h-screen bg-teal-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
-        <h2 className="text-3xl font-bold text-teal-700 dark:text-teal-300 mb-8 text-center animate-fade-in-down tracking-tight">
+    <div className="min-h-screen bg-gradient-to-b from-teal-100 to-teal-50 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <h2 className="text-4xl font-extrabold text-teal-700 dark:text-teal-300 mb-10 text-center animate-fade-in-down tracking-tight">
           Event Details
         </h2>
 
+        {/* Loading State */}
         {(isEventLoading || isAuthLoading) && (
-          <div className="text-center py-12">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-teal-600 dark:border-teal-400 border-r-transparent"></div>
-            <p className="text-gray-600 dark:text-gray-300 mt-3 text-lg animate-pulse">
+          <div className="text-center py-16">
+            <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-teal-600 dark:border-teal-400 border-r-transparent"></div>
+            <p className="text-gray-600 dark:text-gray-300 mt-4 text-xl animate-pulse font-medium">
               {isAuthLoading
                 ? "Loading user data..."
                 : "Loading event details..."}
@@ -169,38 +162,40 @@ const ViewEvent = () => {
           </div>
         )}
 
+        {/* Error State */}
         {error && error.length > 0 && (
-          <div className="bg-red-100 dark:bg-red-900 border-l-4 border-red-500 dark:border-red-400 text-red-700 dark:text-red-300 p-4 rounded-lg mb-6 animate-fade-in shadow-sm">
-            <p className="font-semibold">Error:</p>
+          <div className="bg-red-100 dark:bg-red-900/50 border-l-4 border-red-500 dark:border-red-400 text-red-700 dark:text-red-300 p-6 rounded-xl mb-8 animate-fade-in shadow-md">
+            <p className="font-semibold text-lg">Error:</p>
             <p>{error.map((err) => err.message).join(", ")}</p>
           </div>
         )}
 
+        {/* Event Content */}
         {!isEventLoading &&
           !isAuthLoading &&
           user &&
           event &&
           event._id === eventId && (
-            <div className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-xl shadow-lg animate-fade-in-up">
+            <div className="bg-white dark:bg-gray-800/90 p-8 rounded-2xl shadow-xl animate-fade-in-up border border-teal-200 dark:border-teal-700">
               {/* Organizer Info */}
-              <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
+              <div className="flex flex-col sm:flex-row items-center gap-6 mb-8">
                 <img
                   src={
                     event.organizer?.profilePicture ||
-                    "https://via.placeholder.com/40"
+                    "https://via.placeholder.com/48"
                   }
                   alt={`${
                     event.organizer?.fullName || "Unknown"
                   }'s profile picture`}
-                  className="w-12 h-12 rounded-full object-cover border-2 border-teal-600 dark:border-teal-400"
+                  className="w-16 h-16 rounded-full object-cover border-4 border-teal-600 dark:border-teal-400 shadow-sm"
                 />
                 <div className="text-center sm:text-left">
-                  <h3 className="text-2xl font-semibold text-teal-700 dark:text-teal-300">
+                  <h3 className="text-3xl font-bold text-teal-700 dark:text-teal-300 tracking-tight">
                     {event.name}
                   </h3>
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
                     Organized by{" "}
-                    <span className="font-medium text-teal-600 dark:text-teal-400">
+                    <span className="font-semibold text-teal-600 dark:text-teal-400">
                       {event.organizer?.fullName || "Unknown"} (@
                       {event.organizer?.username || "Unknown"})
                     </span>
@@ -209,16 +204,16 @@ const ViewEvent = () => {
               </div>
 
               {/* Event Details */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
-                <div className="space-y-2">
-                  <p className="text-gray-700 dark:text-gray-300">
-                    <span className="font-medium text-teal-600 dark:text-teal-400">
-                      Date & Time:
-                    </span>{" "}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div className="space-y-4">
+                  <p className="text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                    <span className="font-semibold text-teal-600 dark:text-teal-400">
+                      📅 Date & Time:
+                    </span>
                     {formatDateTime(event.eventDate, event.time)}
                   </p>
-                  <p className="text-gray-700 dark:text-gray-300 flex items-center gap-2 flex-wrap">
-                    <span className="font-medium text-teal-600 dark:text-teal-400 flex items-center gap-1">
+                  <p className="text-gray-700 dark:text-gray-200 flex items-center gap-2 flex-wrap">
+                    <span className="font-semibold text-teal-600 dark:text-teal-400 flex items-center gap-1">
                       <FiMapPin className="text-blue-500 dark:text-blue-400" />
                       Location:
                     </span>
@@ -232,73 +227,88 @@ const ViewEvent = () => {
                           )}`;
                           window.open(mapUrl, "_blank");
                         }}
-                        className="ml-2 text-sm bg-blue-500 dark:bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-600 dark:hover:bg-blue-700 transition"
+                        className="ml-3 text-sm bg-blue-600 dark:bg-blue-700 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-800 transition-all shadow-sm hover:shadow-md"
                       >
                         View on Map
                       </button>
                     )}
                   </p>
-                  <p className="text-gray-700 dark:text-gray-300">
-                    <span className="font-medium text-teal-600 dark:text-teal-400">
+                  <p className="text-gray-700 dark:text-gray-200">
+                    <span className="font-semibold text-teal-600 dark:text-teal-400">
                       Max Attendees:
                     </span>{" "}
                     {event.maxAttendees}
                   </p>
+                  <p className="text-gray-700 dark:text-gray-200">
+                    <span className="font-semibold text-teal-600 dark:text-teal-400">
+                      Category:
+                    </span>{" "}
+                    {event.category}
+                  </p>
                 </div>
-                <div className="space-y-2">
-                  <p className="text-gray-700 dark:text-gray-300">
-                    <span className="font-medium text-teal-600 dark:text-teal-400">
+                <div className="space-y-4">
+                  <p className="text-gray-700 dark:text-gray-200">
+                    <span className="font-semibold text-teal-600 dark:text-teal-400">
                       Created:
                     </span>{" "}
                     {event.createdAt ? formatTimestamp(event.createdAt) : "N/A"}
                   </p>
-                  <p className="text-gray-700 dark:text-gray-300">
-                    <span className="font-medium text-teal-600 dark:text-teal-400">
+                  <p className="text-gray-700 dark:text-gray-200">
+                    <span className="font-semibold text-teal-600 dark:text-teal-400">
                       Last Updated:
                     </span>{" "}
                     {event.updatedAt ? formatTimestamp(event.updatedAt) : "N/A"}
                   </p>
-                  <p className="text-gray-700 dark:text-gray-300">
-                    <span className="font-medium text-teal-600 dark:text-teal-400">
+                  <p className="text-gray-700 dark:text-gray-200">
+                    <span className="font-semibold text-teal-600 dark:text-teal-400">
                       Spots Left:
                     </span>{" "}
                     {event.spotLeft}
+                  </p>
+                  <p className="text-gray-700 dark:text-gray-200">
+                    <span className="font-semibold text-teal-600 dark:text-teal-400">
+                      Sub-Category:
+                    </span>{" "}
+                    {event.subCategory}
                   </p>
                 </div>
               </div>
 
               {/* Description */}
-              <div className="mb-6">
-                <h4 className="text-lg font-semibold text-teal-600 dark:text-teal-400 mb-2">
+              <div className="mb-8">
+                <h4 className="text-xl font-semibold text-teal-600 dark:text-teal-400 mb-3 tracking-tight">
                   Description
                 </h4>
-                <p className="text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
+                <p className="text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800/50 p-6 rounded-xl shadow-inner leading-relaxed">
                   {event.description}
                 </p>
               </div>
 
               {/* Guest List */}
-              <div className="mb-6">
-                <h4 className="text-lg font-semibold text-teal-600 dark:text-teal-400 mb-3">
+              <div className="mb-8">
+                <h4 className="text-xl font-semibold text-teal-600 dark:text-teal-400 mb-4 tracking-tight">
                   Guest List
                 </h4>
                 {guests.length > 0 ? (
-                  <div className="grid sm:grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-700 p-2 rounded-lg shadow-inner">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl shadow-inner">
                     {guests.map((guest) => (
                       <div
                         key={guest._id}
-                        className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm"
+                        className="flex items-center gap-4 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm hover:shadow-md transition-all"
                       >
                         <img
-                          src={guest.profilePicture || "/default.jpg"}
+                          src={
+                            guest.profilePicture ||
+                            "https://via.placeholder.com/40"
+                          }
                           alt={guest.fullName}
-                          className="w-10 h-10 rounded-full object-cover border border-gray-300 dark:border-gray-500"
+                          className="w-12 h-12 rounded-full object-cover border-2 border-teal-500 dark:border-teal-400"
                         />
                         <div>
-                          <p className="text-teal-700 dark:text-teal-300 font-semibold text-sm">
+                          <p className="text-teal-700 dark:text-teal-300 font-semibold text-base">
                             {guest?.fullName}
                           </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
                             @{guest.username}
                           </p>
                         </div>
@@ -306,40 +316,43 @@ const ViewEvent = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500 dark:text-gray-400">
+                  <p className="text-gray-500 dark:text-gray-400 text-center py-4">
                     No one has joined this event yet.
                   </p>
                 )}
               </div>
 
               {/* Comments */}
-              <div className="mb-6">
-                <h4 className="text-lg font-semibold text-teal-600 dark:text-teal-400 mb-3">
+              <div className="mb-8">
+                <h4 className="text-xl font-semibold text-teal-600 dark:text-teal-400 mb-4 tracking-tight">
                   Comments
                 </h4>
-                <div className="space-y-3 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg shadow-inner">
+                <div className="space-y-4 bg-gray-50 dark:bg-gray-800/50 p-6 rounded-xl shadow-inner">
                   {event?.comments?.length > 0 ? (
                     event.comments.map((comment, index) => (
                       <div
                         key={index}
-                        className="flex gap-3 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm hover:shadow-md transition relative"
+                        className="flex gap-4 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm hover:shadow-md transition-all relative group"
                       >
                         <img
-                          src={comment.user?.profilePicture || "/default.jpg"}
+                          src={
+                            comment.user?.profilePicture ||
+                            "https://via.placeholder.com/40"
+                          }
                           alt="Profile"
-                          className="w-10 h-10 rounded-full object-cover border border-gray-300 dark:border-gray-500"
+                          className="w-12 h-12 rounded-full object-cover border-2 border-teal-500 dark:border-teal-400"
                         />
                         <div className="flex-1">
-                          <p className="font-semibold text-teal-700 dark:text-teal-300 text-sm">
+                          <p className="font-semibold text-teal-700 dark:text-teal-300 text-base">
                             {comment.user?.fullName || "Unknown"}{" "}
-                            <span className="text-xs text-gray-400 dark:text-gray-500">
+                            <span className="text-sm text-gray-400 dark:text-gray-500">
                               @{comment.user?.username || "unknown"}
                             </span>
                           </p>
-                          <p className="text-gray-700 dark:text-gray-300 text-sm mt-1">
+                          <p className="text-gray-700 dark:text-gray-200 text-base mt-1 leading-relaxed">
                             {comment.text}
                           </p>
-                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                          <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
                             {new Date(comment.createdAt).toLocaleString(
                               "en-GB"
                             )}
@@ -348,7 +361,7 @@ const ViewEvent = () => {
                         {comment.user?._id === user?._id && (
                           <button
                             onClick={() => handleDeleteComment(comment._id)}
-                            className="absolute top-2 right-2 bg-red-500 dark:bg-red-600 text-white text-xs px-2 py-1 rounded hover:bg-red-600 dark:hover:bg-red-700 transition"
+                            className="absolute top-3 right-3 bg-red-500 dark:bg-red-600 text-white text-sm px-3 py-1.5 rounded-lg hover:bg-red-600 dark:hover:bg-red-700 transition-all opacity-0 group-hover:opacity-100"
                           >
                             Delete
                           </button>
@@ -357,42 +370,44 @@ const ViewEvent = () => {
                     ))
                   ) : (
                     <p className="text-gray-500 dark:text-gray-400 text-center py-4">
-                      No comments yet. Be the first one!
+                      No comments yet. Be the first to comment!
                     </p>
                   )}
                 </div>
               </div>
 
               {/* Add Comment */}
-              <AddComment
-                eventId={eventId}
-                user={user}
-                navigate={navigate}
-                onCommentAdded={() => fetchEventById(eventId, true)}
-              />
+              <div className="mb-8">
+                <AddComment
+                  eventId={eventId}
+                  user={user}
+                  navigate={navigate}
+                  onCommentAdded={() => fetchEventById(eventId, true)}
+                />
+              </div>
 
-              {/* Buttons */}
-              <div className="flex flex-col sm:flex-row justify-end gap-3 mt-8">
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row justify-end gap-4 mt-10">
                 {isOrganizer ? (
                   <>
                     <Link
                       to={`/event/${eventId}/edit`}
-                      className={`px-4 py-2 rounded-md text-white font-medium text-center ${
+                      className={`px-6 py-3 rounded-lg text-white font-semibold text-center transition-all duration-300 shadow-md hover:shadow-lg ${
                         isEventLoading || isAuthLoading
                           ? "bg-teal-400 dark:bg-teal-500 cursor-not-allowed"
                           : "bg-teal-600 dark:bg-teal-700 hover:bg-teal-700 dark:hover:bg-teal-600"
-                      } transition`}
+                      }`}
                       disabled={isEventLoading || isAuthLoading}
                     >
                       Edit Event
                     </Link>
                     <button
                       onClick={handleDelete}
-                      className={`px-4 py-2 rounded-md text-white font-medium text-center ${
+                      className={`px-6 py-3 rounded-lg text-white font-semibold text-center transition-all duration-300 shadow-md hover:shadow-lg ${
                         isEventLoading || isAuthLoading
                           ? "bg-red-400 dark:bg-red-500 cursor-not-allowed"
                           : "bg-red-600 dark:bg-red-600 hover:bg-red-700 dark:hover:bg-red-700"
-                      } transition`}
+                      }`}
                       disabled={isEventLoading || isAuthLoading}
                     >
                       Delete Event
@@ -400,11 +415,11 @@ const ViewEvent = () => {
                   </>
                 ) : (
                   <button
-                    className={`px-4 py-2 rounded-md text-white font-medium text-center ${
+                    className={`px-6 py-3 rounded-lg text-white font-semibold text-center transition-all duration-300 shadow-md hover:shadow-lg ${
                       isEventLoading || isAuthLoading || !user
                         ? "bg-amber-400 dark:bg-amber-500 cursor-not-allowed"
                         : "bg-amber-500 dark:bg-amber-600 hover:bg-amber-600 dark:hover:bg-amber-700"
-                    } transition`}
+                    }`}
                     disabled={isEventLoading || isAuthLoading || !user}
                     onClick={handleJoinEvent}
                   >
@@ -413,21 +428,21 @@ const ViewEvent = () => {
                 )}
                 <Link
                   to="/dashboard"
-                  className={`px-4 py-2 rounded-md text-white font-medium text-center ${
+                  className={`px-6 py-3 rounded-lg text-white font-semibold text-center transition-all duration-300 shadow-md hover:shadow-lg ${
                     isEventLoading || isAuthLoading
                       ? "bg-amber-400 dark:bg-amber-500 cursor-not-allowed"
                       : "bg-amber-500 dark:bg-amber-600 hover:bg-amber-600 dark:hover:bg-amber-700"
-                  } transition`}
+                  }`}
                   disabled={isEventLoading || isAuthLoading}
                 >
                   Back to Dashboard
                 </Link>
                 <button
-                  className={`px-4 py-2 rounded-md text-white font-medium flex items-center justify-center gap-2 text-center ${
+                  className={`px-6 py-3 rounded-lg text-white font-semibold flex items-center justify-center gap-2 text-center transition-all duration-300 shadow-md hover:shadow-lg ${
                     isEventLoading || isAuthLoading || !user
                       ? "bg-green-400 dark:bg-green-500 cursor-not-allowed"
                       : "bg-green-500 dark:bg-green-600 hover:bg-green-600 dark:hover:bg-green-700"
-                  } transition`}
+                  }`}
                   disabled={isEventLoading || isAuthLoading || !user}
                   onClick={handleShare}
                 >

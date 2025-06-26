@@ -32,27 +32,23 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-teal-50 dark:bg-gray-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      {/* Theme Toggle */}
-      <div className="absolute top-4 right-4">
-        <ModeToggle />
-      </div>
-      <div className="max-w-md w-full bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md animate-fade-in-up">
-        <h2 className="text-3xl font-bold text-teal-700 dark:text-teal-300 mb-6 text-center animate-fade-in-down">
+    <div className="min-h-screen bg-gradient-to-b from-teal-100 to-teal-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full bg-white dark:bg-gray-800/90 p-8 rounded-2xl shadow-xl border border-teal-200 dark:border-teal-700 animate-fade-in-up">
+        <h2 className="text-4xl font-extrabold text-teal-700 dark:text-teal-300 mb-8 text-center animate-fade-in-down tracking-tight">
           Log In to Let's Meet
         </h2>
 
         {serverError && (
-          <div className="mb-4 p-3 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded-md animate-fade-in">
-            {serverError}
+          <div className="mb-6 p-6 bg-red-100 dark:bg-red-900/50 border-l-4 border-red-500 dark:border-red-400 text-red-700 dark:text-red-300 rounded-xl shadow-md animate-fade-in">
+            <p className="font-semibold text-lg">{serverError}</p>
           </div>
         )}
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="mb-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div>
             <label
               htmlFor="usermail"
-              className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2"
+              className="block text-gray-600 dark:text-gray-300 text-sm font-semibold mb-2 tracking-tight"
             >
               Username or Email
             </label>
@@ -68,7 +64,7 @@ const Login = () => {
                     "Enter a valid email or username (minimum 3 characters)",
                 },
               })}
-              className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 transition transform focus:scale-100 hover:scale-100 ${
+              className={`w-full p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all duration-200 shadow-sm hover:shadow-md ${
                 errors.usermail
                   ? "border-red-500 focus:ring-red-500"
                   : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
@@ -76,9 +72,9 @@ const Login = () => {
               placeholder="Enter your username or email"
             />
             {errors.usermail && (
-              <div className="mt-1 flex items-center text-red-600 dark:text-red-400 text-sm animate-fade-in">
+              <div className="mt-2 flex items-center text-red-600 dark:text-red-400 text-sm animate-fade-in">
                 <svg
-                  className="w-4 h-4 mr-1"
+                  className="w-5 h-5 mr-1"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -93,10 +89,10 @@ const Login = () => {
             )}
           </div>
 
-          <div className="mb-6 relative">
+          <div className="relative">
             <label
               htmlFor="password"
-              className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2"
+              className="block text-gray-600 dark:text-gray-300 text-sm font-semibold mb-2 tracking-tight"
             >
               Password
             </label>
@@ -110,7 +106,7 @@ const Login = () => {
                   message: "Password must be at least 6 characters long",
                 },
               })}
-              className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 transition transform focus:scale-100 hover:scale-100 ${
+              className={`w-full p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all duration-200 shadow-sm hover:shadow-md ${
                 errors.password
                   ? "border-red-500 focus:ring-red-500"
                   : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
@@ -120,14 +116,14 @@ const Login = () => {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-10 text-gray-600 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400 text-sm"
+              className="absolute right-4 top-12 text-gray-600 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400 text-sm font-medium transition-all duration-200"
             >
               {showPassword ? "Hide" : "Show"}
             </button>
             {errors.password && (
-              <div className="mt-1 flex items-center text-red-600 dark:text-red-400 text-sm animate-fade-in">
+              <div className="mt-2 flex items-center text-red-600 dark:text-red-400 text-sm animate-fade-in">
                 <svg
-                  className="w-4 h-4 mr-1"
+                  className="w-5 h-5 mr-1"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -145,60 +141,66 @@ const Login = () => {
           <Button
             type="submit"
             disabled={isSubmitting}
-            className={`w-full bg-teal-600 dark:bg-teal-700 text-white p-3 rounded-md hover:bg-teal-700 dark:hover:bg-teal-600 transition font-semibold flex items-center justify-center ${
-              isSubmitting ? "opacity-50 cursor-not-allowed" : "animate-pulse"
+            className={`w-full px-6 py-3 rounded-lg font-semibold text-white shadow-md transition-all duration-300 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 ${
+              isSubmitting
+                ? "bg-teal-400 dark:bg-teal-500 opacity-50 cursor-not-allowed"
+                : "bg-teal-600 dark:bg-teal-700 hover:bg-teal-700 dark:hover:bg-teal-600"
             }`}
           >
             {isSubmitting ? (
-              <svg
-                className="animate-spin h-5 w-5 mr-2 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                />
-              </svg>
-            ) : null}
-            {isSubmitting ? "Logging In..." : "Log In"}
+              <div className="flex items-center justify-center">
+                <svg
+                  className="animate-spin h-5 w-5 mr-2 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  />
+                </svg>
+                Logging In...
+              </div>
+            ) : (
+              "Log In"
+            )}
           </Button>
         </form>
 
-        <div className="mt-6 text-center space-y-2">
-          <p className="text-gray-600 dark:text-gray-300 text-sm animate-fade-in-up">
+        <div className="mt-8 text-center space-y-3">
+          <p className="text-gray-600 dark:text-gray-300 text-base font-medium animate-fade-in-up">
             Forgot your password?{" "}
             <Link
               to="/forgot-password"
-              className="text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-medium"
+              className="text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-semibold hover:underline transition-all duration-200"
             >
               Reset it here
             </Link>
           </p>
-          <p className="text-gray-600 dark:text-gray-300 text-sm animate-fade-in-up">
+          <p className="text-gray-600 dark:text-gray-300 text-base font-medium animate-fade-in-up">
             Need to verify your email?{" "}
             <Link
               to="/resend-verification"
-              className="text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-medium"
+              className="text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-semibold hover:underline transition-all duration-200"
             >
               Resend verification email
             </Link>
           </p>
-          <p className="text-gray-600 dark:text-gray-300 text-sm animate-fade-in-up">
+          <p className="text-gray-600 dark:text-gray-300 text-base font-medium animate-fade-in-up">
             Don't have an account?{" "}
             <Link
               to="/signup"
-              className="text-amber-500 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 font-medium"
+              className="text-amber-500 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 font-semibold hover:underline transition-all duration-200"
             >
               Sign Up
             </Link>
