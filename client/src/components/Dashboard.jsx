@@ -1,11 +1,26 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../context/Auth.Context";
 import { useEvent } from "../context/Event.Context";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+
 const Dashboard = () => {
   const { user } = useAuth();
   const { events, isLoading, error, fetchEvents } = useEvent();
   const navigate = useNavigate();
+  const [selectedCategory, setSelectedCategory] = useState("all"); // Initialize to "all"
+
+  // Filter events: show all events if "all" is selected, otherwise filter by category
+  const filteredEvents =
+    selectedCategory === "all"
+      ? events
+      : events.filter((event) => event.category === selectedCategory);
 
   useEffect(() => {
     fetchEvents(); // Fetch events when dashboard mounts
@@ -13,6 +28,7 @@ const Dashboard = () => {
 
   console.log("Events:", events); // Debug events data
   console.log("Userrrr", user);
+
   const handleCreateEvent = () => {
     navigate("/create-event");
   };
@@ -43,6 +59,31 @@ const Dashboard = () => {
           </button>
         </div>
 
+        <div className="mb-6">
+          <Select onValueChange={setSelectedCategory} value={selectedCategory}>
+            <SelectTrigger className="w-full sm:w-60">
+              <SelectValue placeholder="Filter by Category" />
+            </SelectTrigger>
+            <SelectContent className="bg-white dark:bg-gray-700">
+              <SelectItem className="bg-white dark:bg-gray-700" value="all">
+                All Categories
+              </SelectItem>
+              {[...new Set(events.map((event) => event.category))]
+                .filter(
+                  (category) =>
+                    category &&
+                    typeof category === "string" &&
+                    category.trim() !== ""
+                )
+                .map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         {/* Loading State */}
         {isLoading && (
           <p className="text-center text-gray-600 dark:text-gray-300 animate-pulse">
@@ -60,65 +101,59 @@ const Dashboard = () => {
         {/* Events List */}
         {!isLoading && (!error || error.length === 0) && (
           <div className="space-y-6">
-            {events.length === 0 ? (
+            {filteredEvents.length === 0 ? (
               <p className="text-center text-gray-600 dark:text-gray-300 animate-fade-in">
                 No events found. Create your first event!
               </p>
             ) : (
-              events.map((event) => (
+              filteredEvents.map((event, id) => (
                 <div
-                  key={event._id}
-                  className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md animate-fade-in-up"
+                  key={id}
+                  className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md animate-fade-in-up border-l-4 border-teal-600 dark:border-teal-400"
                 >
-                  <div className="flex items-center mb-4">
-                    <img
-                      src={
-                        event.organizer?.profilePicture ||
-                        "https://via.placeholder.com/40"
-                      }
-                      alt={`${
-                        event.organizer?.fullName || "Unknown"
-                      }'s profile picture`}
-                      className="w-10 h-10 rounded-full mr-3 object-cover border-2 border-teal-600 dark:border-teal-400"
-                    />
-                    <h3 className="text-xl font-semibold text-teal-700 dark:text-teal-300">
-                      {event.name}
-                    </h3>
-                  </div>
-                  <p className="text-gray-600 dark:text-gray-300 mt-1">
-                    <span className="font-medium">Date:</span>{" "}
-                    {formatDate(event.eventDate)}
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    <span className="font-medium">Time:</span> {event.time}
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    <span className="font-medium">Location:</span>{" "}
-                    {event.location?.address || "No location provided"}
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    <span className="font-medium">Max Attendees:</span>{" "}
-                    {event.maxAttendees}
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    <span className="font-medium">Spots Left:</span>{" "}
-                    {event?.spotLeft}
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    <span className="font-medium">Organizer:</span>{" "}
-                    {event.organizer?.fullName || "Unknown"} (@
-                    {event.organizer?.username || "Unknown"})
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-300 mt-2">
-                    {event.description}
-                  </p>
-                  <div className="mt-4 flex justify-end">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center">
+                      <img
+                        src={
+                          event.organizer?.profilePicture ||
+                          "https://via.placeholder.com/40"
+                        }
+                        alt={event.organizer?.fullName || "Organizer"}
+                        className="w-10 h-10 rounded-full mr-3 border-2 border-teal-500 object-cover"
+                      />
+                      <div>
+                        <h3 className="text-lg font-semibold text-teal-700 dark:text-teal-300">
+                          {event.name}
+                        </h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          @{event.organizer?.username || "Unknown"}
+                        </p>
+                      </div>
+                    </div>
                     <Link
                       to={`/event/${event._id}`}
-                      className="bg-amber-500 dark:bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-600 dark:hover:bg-amber-700 transition"
+                      className="text-sm text-amber-600 hover:underline font-medium"
                     >
-                      View Details
+                      View Details →
                     </Link>
+                  </div>
+
+                  <div className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
+                    <p>
+                      📅 <span className="font-medium">Date:</span>{" "}
+                      {formatDate(event.eventDate)}
+                    </p>
+                    <p>
+                      🕒 <span className="font-medium">Time:</span> {event.time}
+                    </p>
+                    <p>
+                      📍 <span className="font-medium">Location:</span>{" "}
+                      {event.location?.address || "N/A"}
+                    </p>
+                    <p>
+                      🗂️ <span className="font-medium">Category:</span>{" "}
+                      {event.category} / {event.subCategory}
+                    </p>
                   </div>
                 </div>
               ))
