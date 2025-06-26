@@ -1,4 +1,5 @@
 import validator from "validator";
+import eventCategories from "./eventCategories.js";
 
 const validateCreateEvent = ({
   name,
@@ -7,6 +8,8 @@ const validateCreateEvent = ({
   location,
   description,
   maxAttendees,
+  category,
+  subCategory,
 }) => {
   const errors = [];
 
@@ -106,6 +109,26 @@ const validateCreateEvent = ({
         message: "Max attendees must be a positive integer",
       });
     }
+  }
+
+  // Validate category
+  if (!category || validator.isEmpty(category.trim())) {
+    errors.push({ field: "category", message: "Category is required" });
+  } else if (!Object.keys(eventCategories).includes(category)) {
+    errors.push({
+      field: "category",
+      message: "Invalid category selected",
+    });
+  }
+
+  // Validate subCategory
+  if (!subCategory || validator.isEmpty(subCategory.trim())) {
+    errors.push({ field: "subCategory", message: "Sub-category is required" });
+  } else if (category && !eventCategories[category]?.includes(subCategory)) {
+    errors.push({
+      field: "subCategory",
+      message: "Invalid sub-category for the selected category",
+    });
   }
 
   return errors;

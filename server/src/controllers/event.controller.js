@@ -33,20 +33,26 @@ export const getAllEvents = async (req, res) => {
 };
 
 export const createEvent = async (req, res) => {
-  const { name, date, time, location, description, maxAttendees } = req.body;
-  const userId = req.user?.id; // Use req.user.id
+  const {
+    name,
+    date,
+    time,
+    location,
+    description,
+    maxAttendees,
+    category,
+    subCategory,
+  } = req.body;
+  const userId = req.user?.id;
 
-  // Debug: Log userId
-  console.log("createEvent - User ID:", userId);
+  console.log("Received payload:", req.body);
 
-  // Check if user is authenticated
   if (!userId) {
     return res
       .status(401)
       .json({ error: "User not authenticated, please login 😔" });
   }
 
-  // Validate input
   const errors = validateCreateEvent({
     name,
     date,
@@ -54,13 +60,14 @@ export const createEvent = async (req, res) => {
     location,
     description,
     maxAttendees,
+    category,
+    subCategory,
   });
   if (errors.length > 0) {
     return res.status(400).json({ message: "Validation failed", errors });
   }
 
   try {
-    // Convert 12-hour time to 24-hour for eventDate
     const [hoursMinutes, period] = time.trim().split(/\s+/);
     let [hours, minutes] = hoursMinutes.split(":").map(Number);
     if (period.toUpperCase() === "PM" && hours !== 12) hours += 12;
@@ -71,7 +78,6 @@ export const createEvent = async (req, res) => {
         .padStart(2, "0")}:00Z`
     );
 
-    // Check for duplicate event
     const existingEvent = await Event.findOne({
       name: name.trim(),
       eventDate,
@@ -79,12 +85,10 @@ export const createEvent = async (req, res) => {
     });
     if (existingEvent) {
       return res.status(400).json({
-        message:
-          "An event with the same name and date already exists. Please choose a different name or date.",
+        message: "An event with the same name and date already exists.",
       });
     }
 
-    // location
     if (
       !location?.address ||
       typeof location?.coordinates?.lat !== "number" ||
@@ -95,7 +99,6 @@ export const createEvent = async (req, res) => {
       });
     }
 
-    // Create event
     const event = new Event({
       name,
       eventDate,
@@ -109,12 +112,13 @@ export const createEvent = async (req, res) => {
       },
       description,
       maxAttendees,
+      category,
+      subCategory,
       organizer: userId,
     });
 
     await event.save();
 
-    // Fetch user email
     const user = await User.findById(userId).select("email");
     if (!user || !user.email) {
       console.error("User or email not found for id:", userId);
@@ -125,7 +129,6 @@ export const createEvent = async (req, res) => {
       });
     }
 
-    // Send confirmation email
     const emailSubject = "🎉 Your Event Has Been Created!";
     const emailHtml = createEventTemplate({
       name: event.name,
@@ -134,6 +137,8 @@ export const createEvent = async (req, res) => {
       location: event.location.address,
       description: event.description || "No description provided",
       maxAttendees: event.maxAttendees || "No limit",
+      category: event.category,
+      subCategory: event.subCategory,
       eventId: event._id,
     });
     await sendEmail(user.email, emailSubject, emailHtml);

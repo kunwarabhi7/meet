@@ -33,6 +33,21 @@ const eventSchema = new mongoose.Schema(
         createdAt: { type: Date, default: Date.now },
       },
     ],
+    category: {
+      type: String,
+      required: true,
+      enum: [
+        "🎉 Social Events",
+        "🏢 Corporate Events",
+        "🎓 Educational Events",
+        "🎨 Cultural & Entertainment",
+        "🏃 Sports & Fitness",
+        "💒 Religious & Spiritual",
+        "🌱 Community & Charity",
+        "🛍️ Market & Expo",
+      ],
+    },
+    subCategory: { type: String, required: true },
   },
   { timestamps: true }
 );

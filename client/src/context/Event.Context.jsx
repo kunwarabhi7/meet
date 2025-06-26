@@ -68,7 +68,16 @@ export const EventProvider = ({ children }) => {
   }, [token]);
 
   const createEvent = useCallback(
-    async (name, date, time, location, description, maxAttendees) => {
+    async (
+      name,
+      date,
+      time,
+      location,
+      description,
+      maxAttendees,
+      category,
+      subCategory
+    ) => {
       setIsLoading(true);
       setError([]);
       try {
@@ -81,6 +90,8 @@ export const EventProvider = ({ children }) => {
             location,
             description,
             maxAttendees: parseInt(maxAttendees),
+            category,
+            subCategory,
           },
           {
             headers: { Authorization: `Bearer ${token}` },

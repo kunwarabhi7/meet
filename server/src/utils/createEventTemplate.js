@@ -1,4 +1,3 @@
-// Event creation confirmation email template
 export const createEventTemplate = ({
   name,
   date,
@@ -6,6 +5,8 @@ export const createEventTemplate = ({
   location,
   description,
   maxAttendees,
+  category,
+  subCategory,
   eventId,
 }) => {
   return `
@@ -49,6 +50,16 @@ export const createEventTemplate = ({
                     <tr>
                       <td style="padding: 10px 0; color: #4b5563; font-size: 16px;">
                         <strong>Location:</strong> ${location}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 10px 0; color: #4b5563; font-size: 16px;">
+                        <strong>Category:</strong> ${category}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 10px 0; color: #4b5563; font-size: 16px;">
+                        <strong>Sub-Category:</strong> ${subCategory}
                       </td>
                     </tr>
                     <tr>
@@ -102,6 +113,7 @@ export const createEventTemplate = ({
 };
 
 export const getVerificationEmail = ({ name, verificationLink }) => {
+  // Keep existing verification email template unchanged
   return `
     <!DOCTYPE html>
     <html lang="en">

@@ -12,9 +12,12 @@ import {
   updateEvent,
 } from "../controllers/event.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
+import eventCategories from "../utils/eventCategories.js";
 
 const router = express.Router();
-
+router.get("/categories", (req, res) => {
+  res.json(eventCategories);
+});
 router.get("/", getAllEvents);
 router.post("/", authMiddleware, createEvent);
 router.get("/:eventId", authMiddleware, getEventById);
