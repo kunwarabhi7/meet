@@ -1,12 +1,16 @@
-import React, { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/Auth.Context";
 import imageCompression from "browser-image-compression";
+import { Input } from "./ui/input";
+import { Textarea } from "./ui/textarea";
+import { Button } from "./ui/button";
+import { Label } from "./ui/label";
+import { ModeToggle } from "./ui/ModeToggle";
 
 const Profile = () => {
   const { user, updateUser, isLoading } = useAuth();
-  const uservalue = user;
   const navigate = useNavigate();
   const {
     register,
@@ -14,7 +18,14 @@ const Profile = () => {
     formState: { errors, isSubmitting },
     reset,
     setValue,
-  } = useForm();
+    control,
+  } = useForm({
+    defaultValues: {
+      bio: "",
+      fullName: "",
+      profilePicture: "",
+    },
+  });
   const [isEditing, setIsEditing] = useState(false);
   const [serverError, setServerError] = useState(null);
   const [serverSuccess, setServerSuccess] = useState(null);
@@ -24,83 +35,96 @@ const Profile = () => {
     console.log("User:", user, "IsLoading:", isLoading);
     if (!isLoading && !user) {
       navigate("/login");
-    } else if (user && uservalue) {
+    } else if (user) {
       reset({
-        bio: uservalue.bio || "",
-        fullName: uservalue.fullName || "",
+        bio: user.bio || "",
+        fullName: user.fullName || "",
         profilePicture: "",
       });
-      setPreview(uservalue.profilePicture || null);
+      setPreview(user.profilePicture || null);
     }
-  }, [user, isLoading, navigate, reset, uservalue]);
+  }, [user, isLoading, navigate, reset]);
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        setServerError("Image size must not exceed 5MB");
-        return;
-      }
-      if (
-        !["image/jpeg", "image/jpg", "image/png", "image/gif"].includes(
-          file.type
-        )
-      ) {
-        setServerError("Only JPEG, JPG, PNG, or GIF images are allowed");
-        return;
-      }
-      try {
-        const options = {
-          maxSizeMB: 1,
-          maxWidthOrHeight: 1024,
-          useWebWorker: true,
-        };
-        const compressedFile = await imageCompression(file, options);
-        console.log("Compressed File Size:", compressedFile.size);
-        const base64String = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result);
-          reader.onerror = () => reject(new Error("Failed to read file"));
-          reader.readAsDataURL(compressedFile);
-        });
-        console.log("Base64 String:", base64String);
-        setValue("profilePicture", base64String);
-        setPreview(base64String);
-      } catch (error) {
-        console.error("Image Processing Error:", error);
-        setServerError("Failed to process image");
-      }
-    } else {
+    if (!file) {
       setValue("profilePicture", "");
-      setPreview(uservalue?.profilePicture || null);
+      setPreview(user?.profilePicture || null);
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setServerError("Image size must not exceed 5MB");
+      return;
+    }
+    if (
+      !["image/jpeg", "image/jpg", "image/png", "image/gif"].includes(file.type)
+    ) {
+      setServerError("Only JPEG, JPG, PNG, or GIF images are allowed");
+      return;
+    }
+
+    try {
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1024,
+        useWebWorker: true,
+      };
+      const compressedFile = await imageCompression(file, options);
+      console.log("Compressed File Size:", compressedFile.size);
+      const base64String = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error("Failed to read file"));
+        reader.readAsDataURL(compressedFile);
+      });
+      // Verify base64 string size
+      const base64Data = base64String.split(",")[1];
+      const sizeInBytes =
+        (base64Data.length * 3) / 4 -
+        (base64Data.endsWith("==") ? 2 : base64Data.endsWith("=") ? 1 : 0);
+      if (sizeInBytes > 5 * 1024 * 1024) {
+        setServerError("Compressed image exceeds 5MB");
+        return;
+      }
+      setValue("profilePicture", base64String);
+      setPreview(base64String);
+    } catch (error) {
+      console.error("Image Processing Error:", error);
+      setServerError("Failed to process image");
     }
   };
 
   const onSubmit = async (data) => {
-    console.log("Form Data:", data);
     try {
       setServerError(null);
       setServerSuccess(null);
       const payload = {
-        bio: data.bio,
-        fullName: data.fullName,
+        bio: data.bio || undefined,
+        fullName: data.fullName || undefined,
       };
       if (data.profilePicture && data.profilePicture.startsWith("data:image")) {
         payload.profilePicture = data.profilePicture;
       }
       console.log("Payload to updateUser:", payload);
       const response = await updateUser(payload);
-      setServerSuccess(response.message);
+      setServerSuccess(response.message || "Profile updated successfully!");
       setIsEditing(false);
       reset({
-        bio: response.user.bio,
-        fullName: response.user.fullName,
+        bio: response.user?.bio || "",
+        fullName: response.user?.fullName || "",
         profilePicture: "",
       });
-      setPreview(response.user.profilePicture);
+      setPreview(response.user?.profilePicture || null);
     } catch (error) {
-      console.log("Update profile error:", error);
-      setServerError(error.charAt(0).toUpperCase() + error.slice(1));
+      console.error("Update profile error:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to update profile";
+      setServerError(
+        errorMessage.charAt(0).toUpperCase() + errorMessage.slice(1)
+      );
     }
   };
 
@@ -108,30 +132,36 @@ const Profile = () => {
     setIsEditing(!isEditing);
     setServerError(null);
     setServerSuccess(null);
-    if (!isEditing && uservalue) {
+    if (!isEditing && user) {
       reset({
-        bio: uservalue.bio || "",
-        fullName: uservalue.fullName || "",
+        bio: user.bio || "",
+        fullName: user.fullName || "",
         profilePicture: "",
       });
-      setPreview(uservalue.profilePicture || null);
+      setPreview(user.profilePicture || null);
     }
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-teal-50 flex items-center justify-center">
-        <div className="text-teal-700 text-xl animate-pulse">Loading...</div>
+      <div className="min-h-screen bg-gradient-to-b from-teal-100 to-teal-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+        <div className="text-teal-700 dark:text-teal-300 text-xl animate-pulse">
+          Loading...
+        </div>
       </div>
     );
   }
-  console.log(user, "profileee");
-  if (!user || !uservalue) {
+
+  if (!user) {
     return null; // Avoid rendering until redirect
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-teal-100 to-teal-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      {/* Theme Toggle */}
+      <div className="absolute top-6 right-6">
+        <ModeToggle />
+      </div>
       <div className="max-w-md w-full bg-white dark:bg-gray-800/90 p-8 rounded-2xl shadow-xl border border-teal-200 dark:border-teal-700 animate-fade-in-up">
         {/* Header */}
         <h2 className="text-4xl font-extrabold text-teal-700 dark:text-teal-300 mb-8 text-center animate-fade-in-down tracking-tight">
@@ -147,7 +177,7 @@ const Profile = () => {
 
         {/* Server Success */}
         {serverSuccess && (
-          <div className="mb-6 p-6 bg-green-100 dark:bg-green-900/50 border-l-4 border-green-500 dark:border-green-400 text-green-700 dark:text-green-300 rounded-xl shadow-md animate-fade-in">
+          <div className="mb-6 p-6 bg-amber-100 dark:bg-amber-900/50 border-l-4 border-amber-500 dark:border-amber-400 text-amber-700 dark:text-amber-300 rounded-xl shadow-md animate-fade-in">
             <p className="font-semibold text-lg">{serverSuccess}</p>
           </div>
         )}
@@ -157,51 +187,49 @@ const Profile = () => {
           <div className="space-y-6">
             <div className="flex justify-center">
               <img
-                src={
-                  uservalue.profilePicture || "https://via.placeholder.com/150"
-                }
+                src={user.profilePicture || "https://via.placeholder.com/150"}
                 alt="Profile"
                 className="w-36 h-36 rounded-full object-cover border-4 border-teal-500 dark:border-teal-400 shadow-md"
               />
             </div>
             <div>
-              <label className="block text-gray-600 dark:text-gray-300 text-sm font-semibold mb-2 tracking-tight">
+              <Label className="block text-gray-600 dark:text-gray-300 text-sm font-semibold mb-2 tracking-tight">
                 Full Name
-              </label>
+              </Label>
               <p className="text-gray-900 dark:text-gray-100 text-xl font-medium">
-                {uservalue.fullName}
+                {user.fullName || "No name provided"}
               </p>
             </div>
             <div>
-              <label className="block text-gray-600 dark:text-gray-300 text-sm font-semibold mb-2 tracking-tight">
+              <Label className="block text-gray-600 dark:text-gray-300 text-sm font-semibold mb-2 tracking-tight">
                 Username
-              </label>
+              </Label>
               <p className="text-gray-900 dark:text-gray-100 text-xl font-medium">
-                {uservalue.username}
+                {user.username}
               </p>
             </div>
             <div>
-              <label className="block text-gray-600 dark:text-gray-300 text-sm font-semibold mb-2 tracking-tight">
+              <Label className="block text-gray-600 dark:text-gray-300 text-sm font-semibold mb-2 tracking-tight">
                 Email
-              </label>
+              </Label>
               <p className="text-gray-900 dark:text-gray-100 text-xl font-medium">
-                {uservalue.email}
+                {user.email}
               </p>
             </div>
             <div>
-              <label className="block text-gray-600 dark:text-gray-300 text-sm font-semibold mb-2 tracking-tight">
+              <Label className="block text-gray-600 dark:text-gray-300 text-sm font-semibold mb-2 tracking-tight">
                 Bio
-              </label>
+              </Label>
               <p className="text-gray-900 dark:text-gray-100 text-xl font-medium leading-relaxed">
-                {uservalue.bio || "No bio provided"}
+                {user.bio || "No bio provided"}
               </p>
             </div>
-            <button
+            <Button
               onClick={handleEditToggle}
-              className="w-full bg-teal-600 dark:bg-teal-700 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:bg-teal-700 dark:hover:bg-teal-600 transition-all duration-300 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400"
+              className="w-full px-6 py-3 rounded-lg font-semibold text-white shadow-md transition-all duration-300 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 bg-teal-600 dark:bg-teal-700 hover:bg-teal-700 dark:hover:bg-teal-600"
             >
               Edit Profile
-            </button>
+            </Button>
           </div>
         ) : (
           /* Profile Edit Mode */
@@ -210,7 +238,7 @@ const Profile = () => {
               <img
                 src={
                   preview ||
-                  uservalue.profilePicture ||
+                  user.profilePicture ||
                   "https://via.placeholder.com/150"
                 }
                 alt="Profile Preview"
@@ -218,19 +246,23 @@ const Profile = () => {
               />
             </div>
             <div>
-              <label
+              <Label
                 htmlFor="fullName"
                 className="block text-gray-600 dark:text-gray-300 text-sm font-semibold mb-2 tracking-tight"
               >
                 Full Name
-              </label>
-              <input
+              </Label>
+              <Input
                 id="fullName"
                 {...register("fullName", {
                   minLength: {
                     value: 3,
                     message: "Full name must be at least 3 characters",
                   },
+                  validate: (value) =>
+                    !value ||
+                    typeof value === "string" ||
+                    "Full name must be a string",
                 })}
                 className={`w-full p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all duration-200 shadow-sm hover:shadow-md ${
                   errors.fullName
@@ -257,13 +289,13 @@ const Profile = () => {
               )}
             </div>
             <div>
-              <label
+              <Label
                 htmlFor="bio"
                 className="block text-gray-600 dark:text-gray-300 text-sm font-semibold mb-2 tracking-tight"
               >
                 Bio
-              </label>
-              <textarea
+              </Label>
+              <Textarea
                 id="bio"
                 {...register("bio", {
                   maxLength: {
@@ -297,23 +329,31 @@ const Profile = () => {
               )}
             </div>
             <div>
-              <label
+              <Label
                 htmlFor="profilePicture"
                 className="block text-gray-600 dark:text-gray-300 text-sm font-semibold mb-2 tracking-tight"
               >
                 Profile Picture
-              </label>
-              <input
-                type="file"
-                id="profilePicture"
-                accept="image/jpeg,image/jpg,image/png,image/gif"
-                onChange={handleFileChange}
-                className="w-full p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all duration-200 shadow-sm hover:shadow-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-teal-600 dark:file:bg-teal-700 file:text-white file:font-semibold file:hover:bg-teal-700 dark:file:hover:bg-teal-600"
+              </Label>
+              <Controller
+                name="profilePicture"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    type="file"
+                    id="profilePicture"
+                    accept="image/jpeg,image/jpg,image/png,image/gif"
+                    onChange={(e) => {
+                      field.onChange(e);
+                      handleFileChange(e);
+                    }}
+                    className="w-full p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all duration-200 shadow-sm hover:shadow-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-teal-600 dark:file:bg-teal-700 file:text-white file:font-semibold file:hover:bg-teal-700 dark:file:hover:bg-teal-600"
+                  />
+                )}
               />
-              <input type="hidden" {...register("profilePicture")} />
             </div>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-              <button
+              <Button
                 type="submit"
                 disabled={isSubmitting}
                 className={`flex-1 px-6 py-3 rounded-lg font-semibold text-white shadow-md transition-all duration-300 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 ${
@@ -349,14 +389,14 @@ const Profile = () => {
                 ) : (
                   "Save Changes"
                 )}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={handleEditToggle}
                 className="flex-1 px-6 py-3 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg font-semibold shadow-md hover:bg-gray-400 dark:hover:bg-gray-500 transition-all duration-300 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500"
               >
                 Cancel
-              </button>
+              </Button>
             </div>
           </form>
         )}
